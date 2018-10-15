@@ -7,7 +7,7 @@ const yesterday = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()
 
 
 const findTweets = async () => {
-    return await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 250 })
+    return await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 500 })
 };
 
 const retweet = async (id) => {
