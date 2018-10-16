@@ -5,9 +5,10 @@ var T = new Twit(config)
 const date = new Date();
 const yesterday = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - 1}`
 
+console.log('Twitter Bot Starting...');
 
 const findTweets = async () => {
-    return await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 500 })
+    return await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 200 })
 };
 
 const retweet = async (id) => {
@@ -73,7 +74,7 @@ const checkForContests = async () => {
                 if(counter === tweets.data.statuses.length - 1) {
                     clearInterval(i);
                 }
-            }, 300000);
+            }, 420000);
         }
 
         await setTimeout(checkForContests, 86400000);
