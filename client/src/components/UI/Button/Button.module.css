@@ -1,0 +1,14 @@
+.button {
+    background-color: #FF6B58;
+    color: #FFF;
+}
+
+.button:hover {
+    transition: .3s;
+    background-color: #FF3419;
+    color: #FFF;
+}
+
+.button:active {
+    background-color: #FF1E00;
+}
