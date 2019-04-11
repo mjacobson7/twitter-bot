@@ -39,7 +39,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build/index.html'));
 })
 
-const server = app.listen(4000, () => {
+const server = app.listen(8400, () => {
     const port = server.address().port;
     console.log(`Server listening on port: ${port}`);
 });
