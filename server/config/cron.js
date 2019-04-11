@@ -11,6 +11,9 @@ cron.schedule('0 4 * * *', async () => {
     const bots = await Bot.find({})
 
     bots.map(bot => {
+        console.log(`Working on @${bot.twitterHandle}`)
+        console.log(`${bot.searchTerm} ${yesterday}`)
+        let count = 0;
         if (bot.active) {
             const T = new Twit({
                 consumer_key: secrets.CONSUMER_KEY,
@@ -18,8 +21,8 @@ cron.schedule('0 4 * * *', async () => {
                 access_token: bot.token,
                 access_token_secret: bot.tokenSecret,
             })
-
-            T.get('search/tweets', { q: `${bot.searchTerm} ${yesterday}`, count: bot.searchCount })
+                                        
+            T.get('search/tweets', { q: `${bot.searchTerm} since:${yesterday}`, count: bot.searchCount })
                 .then(tweets => {
                     tweets.data.statuses.map(tweet => {
                         if (!tweet.hasOwnProperty('retweeted_status')) {
@@ -28,7 +31,7 @@ cron.schedule('0 4 * * *', async () => {
                                 T.post('friendships/create', { screen_name: tweet.user.screen_name }),
                                 T.post('favorites/create', { id: tweet.id_str })
                             ])
-                                .then(() => console.log("Contest Entered!!!"))
+                                .then(() => { console.log("Contest Entered!!!"); count++ })
                                 .catch(err => console.log(err))
                         }
                         else {
@@ -37,11 +40,12 @@ cron.schedule('0 4 * * *', async () => {
                                 T.post('friendships/create', { screen_name: tweet.retweeted_status.user.screen_name }),
                                 T.post('favorites/create', { id: tweet.retweeted_status.id_str })
                             ])
-                                .then(() => console.log("Contest Entered!!!"))
+                                .then(() => { console.log("Contest Entered!!!"); count++ })
                                 .catch(err => console.log(err))
                         }
                     })
                 })
         }
+        console.log(`Contests Entered Count: ${count}`)
     })
 }, { scheduled: true, timezone: "America/Denver" });
