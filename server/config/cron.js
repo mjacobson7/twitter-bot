@@ -27,6 +27,7 @@ cron.schedule('0 4 * * *', async () => {
             const keywords = ['rt to', 'rt and win', 'retweet and win', 'rt for', 'rt 4', 'retweet to']
             const searchTerms = ['RT to win', 'retweet to win']
             const bannedUsers = ['ilove70315673', 'followandrt2win']
+            const bannedDescriptionKeywords = ['sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
 
             let tweets = [];
 
@@ -49,6 +50,14 @@ cron.schedule('0 4 * * *', async () => {
                 if ((tweet.user.screen_name).toLowerCase().includes('bot') || (tweet.user.screen_name).toLowerCase().includes('b0t') || (tweet.user.screen_name).toLowerCase().includes('spam') || (tweet.user.screen_name).toLowerCase().includes('spot') || (tweet.user.name).toLowerCase().includes('bot') || (tweet.user.name).toLowerCase().includes('b0t') || (tweet.user.name).toLowerCase().includes('spam') || (tweet.user.name).toLowerCase().includes('spot')) {
                     return false;
                 }
+
+                // Don't include tweets from banned description list
+                const bannedKeywordsExists = bannedDescriptionKeywords.filter(keyword => {
+                    return !tweet.user.description.includes(keyword);
+                })
+
+                if(bannedKeywordsExists.length > 0) return false;
+
                 //Don't include tweets from banned users list
                 let bannedExists = bannedUsers.filter(bannedUser => {
                     if (tweet.user.screen_name.includes(bannedUser)) return true;
@@ -74,6 +83,8 @@ cron.schedule('0 4 * * *', async () => {
                     })
                 }
             })
+
+
             console.log(`Contests Entered: ${contestsEntered}`)
             console.log(`Finished work for @${bot.twitterHandle}`)
         }
