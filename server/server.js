@@ -25,6 +25,7 @@ require('./config/cron');
 
 //Passport
 require('./config/passport')(passport); // pass passport for configuration
+
 app.use(session({secret: secrets.SESSION_SECRET}));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
@@ -33,10 +34,10 @@ app.use(passport.session()); // persistent login sessions
 //routes
 require('./routes')(app, passport);
 
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+    res.sendFile(path.join(__dirname, '../client/dist'));
 })
 
 const server = app.listen(8400, () => {

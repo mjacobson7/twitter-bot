@@ -1,44 +1,39 @@
-const Bot = require('./models/Bot');
+const secrets = require('./config/secrets');
+const stripe = require("stripe")(secrets.STRIPE_PRIVATE_KEY);
+const User = require('./models/User');
+
 
 module.exports = (app, passport) => {
 
-    app.get('/botLists', isLoggedIn, (req, res) => {
-        Bot.find({ userId: req.user.id }, (err, bots) => {
-            if (err) throw err;
-            res.status(200).json(bots)
-        })
-    });
+    // app.get('/botLists', isLoggedIn, (req, res) => {
+    //     Bot.find({ userId: req.user.id }, (err, bots) => {
+    //         if (err) throw err;
+    //         res.status(200).json(bots)
+    //     })
+    // });
 
-    app.get('/bot/:botId', isLoggedIn, (req, res) => {
-        Bot.findById(req.params.botId, (err, bot) => {
-            if (err) throw err;
-            res.status(200).json(bot);
-        })
-    })
+    // app.get('/bot/:botId', isLoggedIn, (req, res) => {
+    //     Bot.findById(req.params.botId, (err, bot) => {
+    //         if (err) throw err;
+    //         res.status(200).json(bot);
+    //     })
+    // })
 
-    app.post('/saveBot', isLoggedIn, (req, res) => {
-        if (req.body.id) {
-            Bot.findByIdAndUpdate(req.body.id, req.body, (err, bot) => {
-                if (err) throw err;
-                res.status(200).json(bot);
-            })
-        } else {
-            const bot = new Bot(req.body);
-            bot.userId = req.user.id;
-            bot.save(err => {
-                if (err) throw err;
-                res.status(200).json(bot);
-            });
-        }
-    })
-
-    app.post('/login', passport.authenticate('local-login'), (req, res) => {
-        res.status(200).json(req.user);
-    });
-
-    app.post('/signup', passport.authenticate('local-signup'), (req, res) => {
-        // console.log(req.user);
-    });
+    // app.post('/saveBot', isLoggedIn, (req, res) => {
+    //     if (req.body.id) {
+    //         Bot.findByIdAndUpdate(req.body.id, req.body, (err, bot) => {
+    //             if (err) throw err;
+    //             res.status(200).json(bot);
+    //         })
+    //     } else {
+    //         const bot = new Bot(req.body);
+    //         bot.userId = req.user.id;
+    //         bot.save(err => {
+    //             if (err) throw err;
+    //             res.status(200).json(bot);
+    //         });
+    //     }
+    // })
 
     app.get('/signout', (req, res) => {
         req.logout();
@@ -53,14 +48,42 @@ module.exports = (app, passport) => {
         }
     })
 
+
+
+
+
+
+    app.get('/getAuthenticatedUser', (req, res) => {
+        if (req.user) {
+            res.status(200).json(req.user)
+        } else {
+            res.status(200).json(null)
+        }
+
+    })
+
     app.get('/auth/twitter', passport.authenticate('twitter'));
 
-    app.get('/auth/twitter/callback',
-        passport.authenticate('twitter', { session: false }),
-        function (req, res) {
-            // Successful authentication, redirect home.
-            res.redirect('/dashboard');
-        });
+    app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+        successRedirect: '/#/payment',
+        failureRedirect: '/'
+    }))
+    app.post('/stripe', (req, res) => {
+
+        stripe.customers.create({
+            source: req.body.id,
+            email: req.body.email
+        }).then(customer => {
+            stripe.subscriptions.create({
+                customer: customer.id,
+                items: [{
+                    plan: 'plan_FNkLKnVhooEeU7'
+                }]
+            }).then(data => res.status(200).json(data))
+        }).catch(err => console.log(err))
+
+
+    })
 
 }
 

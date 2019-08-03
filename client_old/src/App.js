@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Layout from './hoc/Layout/Layout';
 import { Route, withRouter } from 'react-router-dom';
 import Login from './containers/Login/Login';
+import Landing from './containers/Landing/Landing';
 import Dashboard from './containers/Dashboard/Dashboard';
 import CreateBot from './containers/CreateBot/CreateBot';
 import Aux from './hoc/Aux/Aux';
@@ -47,6 +48,7 @@ class App extends Component {
     return (
       <Layout>
         <Switch>
+          <Route path="/" render={() => (<Landing />)} />
           <Route path="/login" render={() => (<Login login={(e) => this.loginHandler(e)} />)} />
           {this.state.authenticated ? <Route path="/dashboard" component={Dashboard} /> : null}
           {this.state.authenticated ? <Route exact path="/createBot" component={CreateBot} /> : null}
