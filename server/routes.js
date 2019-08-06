@@ -68,6 +68,7 @@ module.exports = (app, passport) => {
         successRedirect: '/#/payment',
         failureRedirect: '/'
     }))
+    
     app.post('/stripe', (req, res) => {
 
         stripe.customers.create({

@@ -11,8 +11,9 @@
       </a>
     </div>
 
-    <div v-if="activeStep == 2">
-      <p>Welcome @ {{user.username}}!</p>
+    <div class="payment-details-container" v-if="activeStep == 2" >
+      <h1 style="text-align: center; margin: 15px 0;">Welcome @{{user.username}}!</h1>
+      <h3 style="text-align: center; margin: 15px 0;">You're almost there!</h3>
       <Stripe @paymentSuccess="onPaymentSuccess" @paymentFailure="onPaymentFailure"></Stripe>
       <p>{{error}}</p>
     </div>
@@ -106,5 +107,17 @@ export default {
 .twitter-login .icon:after {
   content: "";
   border-right: 1px solid #66abe1;
+}
+
+
+.payment-details-container {
+  max-width: 50%; 
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 1200px) {
+  .payment-details-container {
+    max-width: 80%;
+  }
 }
 </style>

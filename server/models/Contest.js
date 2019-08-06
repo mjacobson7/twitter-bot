@@ -2,13 +2,14 @@ const mongoose = require('mongoose');
 
 
 const contestSchema = mongoose.Schema({
-    token: String,
-    tokenSecret: String,
-    username: String,
-    name: String,
-    friendsCount: Number,
-    active: Boolean,
-    suspended: Boolean
+    _id: Number,
+    userId: Number,
+    screenName: String,
+    text: String,
+    followed: Boolean,
+    favorited: Boolean,
+    retweeted: Boolean,
+    date: Date
 });
 
 

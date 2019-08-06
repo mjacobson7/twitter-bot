@@ -1,4 +1,3 @@
-const LocalStrategy = require('passport-local').Strategy;
 const TwitterStrategy = require('passport-twitter').Strategy;
 const User = require('../models/User');
 const secrets = require('../config/secrets');

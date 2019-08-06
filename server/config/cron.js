@@ -1,9 +1,8 @@
 const cron = require('node-cron');
 const User = require('../models/User');
+const Contest = require('../models/Contest');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
-
-
 
 
 // cron.schedule('0 4 * * *', async () => {
@@ -29,75 +28,154 @@ var Twitter = require('twitter');
                 access_token_secret: user.tokenSecret,
             });
 
-            const searchTerms = ['"RT to win"', '"retweet to win"']
-            const bannedUsers = ['ilove70315673', 'followandrt2win', 'walkermarkk11']
-            const bannedDescriptionKeywords = ['sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
+            const searchTerms = ["Retweet to win", "RT to win"]
 
             let tweets = [];
 
-
-
             // Get tweets between yesterday and today with the search terms provided
             await Promise.all(searchTerms.map(async search => {
-                let retVal = await T.get('search/tweets', { q: `${search} -filter:retweets -filter:replies`, count: 400, lang: 'en', since: yesterday, until: today });
-                console.log(`OG Length: ${retVal.statuses.length} for ${search}`)
+                let retVal = await T.get('search/tweets', { q: `${search} -filter:retweets -filter:replies`, count: 10, lang: 'en', since: yesterday, until: today });
                 if (retVal.statuses.length > 0) {
                     tweets.push(...retVal.statuses);
                 }
             }))
             console.log(`Tweets Length: ${tweets.length}`)
 
-            let filteredTweets = tweets.filter((tweet, index) => {
+            var i = 0;
 
-                // Remove tweets that have already been favorited or retweeted
-                if (tweet.favorited || tweet.retweeted) {
-                    console.log('favorited or retweeted already')
-                    return false;
+            const likeFollowRetweet = async () => {
+                try {
+                    await setTimeout(async () => {
+                        const isDup = await isDuplicate(tweets[i]);
+                        if (!isDup) {
+                            const isBot = await isBotAccount(tweets[i]);
+                            if (!isBot) {
+                                const keywordBan = await hasBannedKeywords(tweets[i]);
+                                if (!keywordBan) {
+                                    const bannedUser = await isBannedUser(tweets[i]);
+                                    if (!bannedUser) {
+                                        let contest = await createContestObject(tweets[i]);
+                                        contestLiked = await like(contest, tweets[i]);
+                                        contestFollowed = await follow(contestLiked ? contestLiked : contest, tweets[i]);
+                                        contestRetweeted = await retweet(contestFollowed ? contestFollowed : contestLiked ? contestLiked : contest, tweets[i]);
+
+                                        if (contestRetweeted) {
+                                            contest = await contestRetweeted.save();
+                                        } else if (contestFollowed) {
+                                            contest = await contestFollowed.save();
+                                        } else if (contestLiked) {
+                                            contest = await contestLiked.save();
+                                        } else {
+                                            contest = await contest.save();
+                                        }
+
+                                        console.log(contest)
+                                    };
+                                };
+                            };
+                        };
+
+                        i++;
+
+                        if (i < tweets.length) {
+                            likeFollowRetweet();
+                        }
+                    }, 3000)
                 }
+                catch (err) {
+                    throw err;
+                }
+            }
 
-                // Don't include tweets where bot or b0t is in the screenname
+            likeFollowRetweet();
+
+            const createContestObject = async (tweet) => {
+                const contest = new Contest();
+                contest._id = tweet.id_str;
+                contest.userId = user.id;
+                contest.screenName = tweet.user.screen_name;
+                contest.text = tweet.text;
+                contest.date = new Date();
+                contest.followed = false;
+                contest.retweeted = false;
+                contest.favorited = false;
+                return await contest.save();
+            }
+
+            const like = async (contest, tweet) => {
+                try {
+                    await T.post('favorites/create', { id: tweet.id_str })
+                    contest.favorited = true;
+                    return contest;
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+
+            const follow = async (contest, tweet) => {
+                try {
+                    await T.post('friendships/create', { screen_name: tweet.user.screen_name });
+                    contest.followed = true;
+                    return contest;
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+
+            const retweet = async (contest, tweet) => {
+                try {
+                    await T.post('statuses/retweet/' + tweet.id_str, {});
+                    contest.retweeted = true;
+                    return contest;
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+
+            const isDuplicate = async (tweet) => {
+                const contest = await Contest.findById(tweet.id_str);
+                if (contest) return true;
+                return false;
+            }
+
+            const isBotAccount = async (tweet) => {
                 if ((tweet.user.screen_name).toLowerCase().includes('bot') || (tweet.user.screen_name).toLowerCase().includes('b0t') || (tweet.user.screen_name).toLowerCase().includes('spam') || (tweet.user.screen_name).toLowerCase().includes('spot') || (tweet.user.name).toLowerCase().includes('bot') || (tweet.user.name).toLowerCase().includes('b0t') || (tweet.user.name).toLowerCase().includes('spam') || (tweet.user.name).toLowerCase().includes('spot')) {
-                    console.log(`User [${tweet.user.screen_name}] is a bot`)
-                    return false;
+                    return true;
                 }
+                return false;
+            }
 
-                // Don't include tweets from banned description list
-                let bannedKeywordsSum = 0;
-                bannedDescriptionKeywords.map(keyword => {
-                    if (tweet.user.description.includes(keyword)) bannedKeywordsSum += 1;
-                })
+            const hasBannedKeywords = async (tweet) => {
+                const bannedDescriptionKeywords = ['sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
+                let bannedKeywordCount = 0;
+                await Promise.all(bannedDescriptionKeywords.map(async keyword => {
+                    tweet.user.description.includes(keyword) ? bannedKeywordCount++ : ''
+                }))
 
-                if (bannedKeywordsSum > 0) {
-                    console.log('banned keyword')
-                    return false;
-                }
+                if (bannedKeywordCount > 0) true;
+                return false;
+            }
 
-                //Don't include tweets from banned users list
-                let bannedUsersSum = 0;
-                bannedUsers.map(bannedUser => tweet.user.screen_name.includes(bannedUser) ? bannedUsersSum += 1 : '')
+            const isBannedUser = async (tweet) => {
+                const bannedUsers = ['ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg']
+                let bannedUsersCount = 0;
+                await Promise.all(bannedUsers.map(async bannedUser => {
+                    tweet.user.screen_name.includes(bannedUser) ? bannedUsersSum++ : ''
+                }))
 
-                if (bannedUsersSum > 0) {
-                    console.log(`User [${tweet.user.screen_name} is banned`)
-                    return false;
-                }
-
-                return true;
-            });
-
-            console.log(`filteredTweets length: ${filteredTweets.length}`)
+                if (bannedUsersCount > 0) return true;
+                return false;
+            }
 
 
-            await Promise.all(filteredTweets.map(async tweet => {
-                T.post('friendships/create', { screen_name: tweet.user.screen_name }).catch(err => console.log(err[0].message)),
-                T.post('favorites/create', { id: tweet.id_str }).catch(err => console.log(err[0].message)),
-                T.post('statuses/retweet/' + tweet.id_str, {}).catch(err => console.log(err[0].message))
-            }))
-                .then(data => {
-                    // console.log(data)
-                })
-                .catch(err => {
-                    // console.log(err.message)
-                })
+
+
+
+
+
 
         }
 
@@ -105,5 +183,3 @@ var Twitter = require('twitter');
 
 })()
 // }, { scheduled: true, timezone: "America/Denver" });
-
-
