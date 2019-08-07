@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <Header></Header>
+  <div style="background-color: #F4F6FC; position: relative;">
+    <Header @dropdown="onDropdownToggle"></Header>
+    <div v-bind:class="{active: headerDropdownOpen}" style="width: 177px; height: 100px; background-color: #343a40; position: absolute; top: 50px; right: 0; display: none;"></div>
 
     <table class="responsive-table">
       <thead>
@@ -36,8 +37,14 @@ export default {
   },
   data() {
     return {
-      contests: null
+      contests: null,
+      headerDropdownOpen: false
     };
+  },
+  methods: {
+    onDropdownToggle(value) {
+      this.headerDropdownOpen = value;
+    }
   },
   mounted() {
     this.$http.get("/contests").then(data => {
@@ -48,9 +55,14 @@ export default {
 </script>
 
 <style scoped>
+.active {
+  display: block !important;
+}
+
 .responsive-table {
-  width: 100%;
-  margin-bottom: 1.5em;
+  width: 100vw;
+  margin: 0 auto;
+  background-color: #FFF;
 }
 .responsive-table thead {
   position: absolute;
@@ -64,8 +76,8 @@ export default {
   overflow: hidden;
 }
 .responsive-table thead th {
-  background-color: #1d96b2;
-  border: 1px solid #1d96b2;
+  background-color: #009ed8;
+  border: 1px solid #009ed8;
   font-weight: normal;
   text-align: center;
   color: white;
@@ -99,13 +111,13 @@ export default {
 }
 .responsive-table tbody tr {
   margin-bottom: 1em;
-  border: 2px solid #1d96b2;
+  border: 2px solid #009ed8;
 }
 .responsive-table tbody tr:last-of-type {
   margin-bottom: 0;
 }
 .responsive-table tbody th[scope="row"] {
-  background-color: #1d96b2;
+  background-color: #009ed8;
   color: white;
 }
 .responsive-table tbody td[data-type="currency"] {
@@ -119,12 +131,14 @@ export default {
 }
 .responsive-table tbody td {
   text-align: right;
-  border-bottom: 1px solid #1d96b2;
+  border-bottom: 1px solid #009ed8;
 }
 
 @media (min-width: 52em) {
   .responsive-table {
     font-size: 0.9em;
+    width: 90vw;
+    margin-top: 50px;
   }
   .responsive-table thead {
     position: relative;
@@ -170,6 +184,7 @@ export default {
 @media (min-width: 62em) {
   .responsive-table {
     font-size: 1em;
+    width: 70vw;
   }
   .responsive-table th,
   .responsive-table td {
