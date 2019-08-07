@@ -1,25 +1,26 @@
 <template>
   <div>
     <Header></Header>
-    <table>
+
+    <table class="responsive-table">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Screen Name</th>
-          <th>Text</th>
-          <th>Favorited</th>
-          <th>Retweeted</th>
-          <th>Followed</th>
+          <th scope="col">Date</th>
+          <th scope="col">Screen Name</th>
+          <th scope="col">Tweet Link</th>
+          <th scope="col">Favorited</th>
+          <th scope="col">Retweeted</th>
+          <th scope="col">Followed</th>
         </tr>
       </thead>
       <tbody v-for="contest in contests" :key="contest">
         <tr>
-          <td data-column="date">{{contest.date}}</td>
-          <td data-column="Last Name">@{{contest.screenName}}</td>
-          <td data-column="Text">{{contest.text}}</td>
-          <td data-column="Favorited">{{contest.favorited}}</td>
-          <td data-column="Retweeted">{{contest.retweeted}}</td>
-          <td data-column="Followed">{{contest.followed}}</td>
+          <th scope="row">{{moment(contest.date).local().format('lll')}}</th>
+          <td data-title="Screen Name">@{{contest.screenName}}</td>
+          <td data-title="Tweet Link"><a :href="'https://twitter.com/tweet/status/' + contest._id" target="_blank">Link</a></td>
+          <td data-title="Favorited">{{contest.favorited}}</td>
+          <td data-title="Retweeted">{{contest.retweeted}}</td>
+          <td data-title="Followed">{{contest.followed}}</td>
         </tr>
       </tbody>
     </table>
@@ -47,79 +48,142 @@ export default {
 </script>
 
 <style scoped>
-table {
-  width: 750px;
-  border-collapse: collapse;
-  margin: 50px auto;
+.responsive-table {
+  width: 100%;
+  margin-bottom: 1.5em;
 }
-/* Zebra striping */
-tr:nth-of-type(odd) {
-  background: #eee;
+.responsive-table thead {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0;
+  border: 0;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
 }
-th {
-  background: #3498db;
+.responsive-table thead th {
+  background-color: #1d96b2;
+  border: 1px solid #1d96b2;
+  font-weight: normal;
+  text-align: center;
   color: white;
-  font-weight: bold;
 }
-td,
-th {
-  padding: 10px;
-  border: 1px solid #ccc;
+.responsive-table thead th:first-of-type {
   text-align: left;
-  font-size: 18px;
+}
+.responsive-table tbody,
+.responsive-table tr,
+.responsive-table th,
+.responsive-table td {
+  display: block;
+  padding: 0;
+  text-align: left;
+  white-space: normal;
+}
+.responsive-table th,
+.responsive-table td {
+  padding: 0.5em;
+  vertical-align: middle;
+}
+.responsive-table caption {
+  margin-bottom: 1em;
+  font-size: 1em;
+  font-weight: bold;
+  text-align: center;
+}
+.responsive-table tfoot {
+  font-size: 0.8em;
+  font-style: italic;
+}
+.responsive-table tbody tr {
+  margin-bottom: 1em;
+  border: 2px solid #1d96b2;
+}
+.responsive-table tbody tr:last-of-type {
+  margin-bottom: 0;
+}
+.responsive-table tbody th[scope="row"] {
+  background-color: #1d96b2;
+  color: white;
+}
+.responsive-table tbody td[data-type="currency"] {
+  text-align: right;
+}
+.responsive-table tbody td[data-title]:before {
+  content: attr(data-title);
+  float: left;
+  font-size: 0.8em;
+  color: rgba(94, 93, 82, 0.75);
+}
+.responsive-table tbody td {
+  text-align: right;
+  border-bottom: 1px solid #1d96b2;
 }
 
-/* 
-Max width before this PARTICULAR table gets nasty
-This query will take effect for any screen smaller than 760px
-and also iPads specifically.
-*/
-@media only screen and (max-width: 760px),
-  (min-device-width: 768px) and (max-device-width: 1024px) {
-  table {
-    width: 100%;
+@media (min-width: 52em) {
+  .responsive-table {
+    font-size: 0.9em;
   }
-  /* Force table to not be like tables anymore */
-  table,
-  thead,
-  tbody,
-  th,
-  td,
-  tr {
-    display: block;
-  }
-
-  /* Hide table headers (but not display: none;, for accessibility) */
-  thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-
-  tr {
-    border: 1px solid #ccc;
-  }
-
-  td {
-    /* Behave  like a "row" */
-    border: none;
-    border-bottom: 1px solid #eee;
+  .responsive-table thead {
     position: relative;
-    padding-left: 50%;
+    clip: auto;
+    height: auto;
+    width: auto;
+    overflow: auto;
+  }
+  .responsive-table tr {
+    display: table-row;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    display: table-cell;
+    padding: 0.5em;
   }
 
-  td:before {
-    /* Now like a table header */
-    position: absolute;
-    /* Top/left values mimic padding */
-    top: 6px;
-    left: 6px;
-    width: 45%;
-    padding-right: 10px;
-    white-space: nowrap;
-    /* Label the data */
-    content: attr(data-column);
-    color: #3498db;
+  .responsive-table caption {
+    font-size: 1.5em;
+  }
+  .responsive-table tbody {
+    display: table-row-group;
+  }
+  .responsive-table tbody tr {
+    display: table-row;
+    border-width: 1px;
+  }
+  .responsive-table tbody tr:nth-of-type(even) {
+    background-color: rgba(94, 93, 82, 0.1);
+  }
+  .responsive-table tbody th[scope="row"] {
+    background-color: transparent;
+    color: #5e5d52;
+    text-align: left;
+  }
+  .responsive-table tbody td {
+    text-align: center;
+  }
+  .responsive-table tbody td[data-title]:before {
+    content: none;
+  }
+}
+@media (min-width: 62em) {
+  .responsive-table {
+    font-size: 1em;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    padding: 0.75em 0.5em;
+  }
+  .responsive-table tfoot {
+    font-size: 0.9em;
+  }
+}
+
+@media (min-width: 75em) {
+  .responsive-table th,
+  .responsive-table td {
+    padding: 0.75em;
   }
 }
 </style>
