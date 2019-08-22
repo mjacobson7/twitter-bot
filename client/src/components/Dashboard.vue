@@ -3,8 +3,11 @@
     <Header :authenticated="true" @dropdown="onDropdownToggle"></Header>
     <div
       v-bind:class="{active: headerDropdownOpen}"
-      style="width: 177px; height: 100px; background-color: #343a40; position: absolute; top: 50px; right: 0; display: none;"
-    ></div>
+      style="width: 177px; background-color: #343a40; position: absolute; top: 68px; right: 0; display: none;"
+    >
+      <div class="header-dropdown-item">My Account</div>
+      <div @click="logout()" class="header-dropdown-item">Log Out</div>
+    </div>
 
     <table class="responsive-table">
       <thead>
@@ -49,6 +52,11 @@ export default {
   methods: {
     onDropdownToggle(value) {
       this.headerDropdownOpen = value;
+    },
+    logout() {
+      this.$http.get("/logout").then(data => {
+        that.$router.push("/login");
+      });
     }
   },
   mounted() {
@@ -62,6 +70,18 @@ export default {
 <style scoped>
 .active {
   display: block !important;
+}
+
+.header-dropdown-item {
+  color: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.header-dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #f4f6fc;
 }
 
 .responsive-table {

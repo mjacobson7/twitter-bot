@@ -13,7 +13,7 @@
 
 <script>
 export default {
-  props: ['authenticated'],
+  props: ["authenticated"],
   data() {
     return {
       isOpen: false
