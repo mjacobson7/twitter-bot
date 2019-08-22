@@ -9,6 +9,9 @@ export default {};
 </script>
 
 <style>
+html, body {
+  background-color: #F5F6F7;
+}
 .sub-text {
   color: #8a8a8a;
   font-size: 14px;

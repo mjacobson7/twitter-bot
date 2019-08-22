@@ -1,7 +1,10 @@
 <template>
   <div style="background-color: #F4F6FC; position: relative;">
-    <Header @dropdown="onDropdownToggle"></Header>
-    <div v-bind:class="{active: headerDropdownOpen}" style="width: 177px; height: 100px; background-color: #343a40; position: absolute; top: 50px; right: 0; display: none;"></div>
+    <Header :authenticated="true" @dropdown="onDropdownToggle"></Header>
+    <div
+      v-bind:class="{active: headerDropdownOpen}"
+      style="width: 177px; height: 100px; background-color: #343a40; position: absolute; top: 50px; right: 0; display: none;"
+    ></div>
 
     <table class="responsive-table">
       <thead>
@@ -18,7 +21,9 @@
         <tr>
           <th scope="row">{{moment(contest.date).local().format('lll')}}</th>
           <td data-title="Screen Name">@{{contest.screenName}}</td>
-          <td data-title="Tweet Link"><a :href="'https://twitter.com/tweet/status/' + contest._id" target="_blank">Link</a></td>
+          <td data-title="Tweet Link">
+            <a :href="'https://twitter.com/tweet/status/' + contest._id" target="_blank">Link</a>
+          </td>
           <td data-title="Favorited">{{contest.favorited}}</td>
           <td data-title="Retweeted">{{contest.retweeted}}</td>
           <td data-title="Followed">{{contest.followed}}</td>
@@ -62,7 +67,7 @@ export default {
 .responsive-table {
   width: 100vw;
   margin: 0 auto;
-  background-color: #FFF;
+  background-color: #fff;
 }
 .responsive-table thead {
   position: absolute;

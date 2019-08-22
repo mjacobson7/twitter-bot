@@ -2,6 +2,10 @@
   <div>
     <div class="group">
       <label>
+        <span>Email</span>
+        <input class="field" v-model="email" placeholder="john.doe@example.com" />
+      </label>
+      <label>
         <span>Card number</span>
         <div ref="cardNumber" id="card-number-element" class="field"></div>
       </label>
@@ -51,17 +55,38 @@ var elementClasses = {
 
 export default {
   data() {
-    return {};
+    return {
+      email: ""
+    };
   },
   methods: {
     purchase() {
-      stripe.createToken(this.cardNumber).then(result => {
-        if (result.token) {
-          this.$emit("paymentSuccess", result.token.id);
-        } else {
-          this.$emit("paymentFailure", result.error.message);
-        }
-      });
+      let that = this;
+      if (this.validateEmail()) {
+        stripe.createToken(this.cardNumber).then(result => {
+          if (result.token) {
+            this.$http
+              .post("/charge", { token: result.token, email: this.email })
+              .then(retVal => {
+                this.$emit("paymentSuccess", result.token.id);
+              })
+              .catch(err => {
+                alert(err.body);
+                if (err.status == 401) {
+                  that.$router.push("/dashboard");
+                }
+              });
+          } else {
+            this.$emit("paymentFailure", result.error.message);
+          }
+        });
+      } else {
+        alert("Please include a valid email");
+      }
+    },
+    validateEmail() {
+      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(this.email).toLowerCase());
     }
   },
 
@@ -83,6 +108,11 @@ export default {
       classes: elementClasses
     });
     this.cardCvc.mount(this.$refs.cardCvc);
+  },
+  beforeDestroy() {
+    this.cardNumber.destroy(this.$refs.cardNumber);
+    this.cardExpiry.destroy(this.$refs.cardExpiry);
+    this.cardCvc.destroy(this.$refs.cardCvc);
   }
 };
 </script>

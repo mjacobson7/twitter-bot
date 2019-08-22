@@ -1,6 +1,6 @@
 <template>
   <div class="topnav">
-    <a @click="toggleDropdown">
+    <a v-if="authenticated" @click="toggleDropdown">
       My Account
       <img
         v-bind:class="{ active: isOpen }"
@@ -13,6 +13,7 @@
 
 <script>
 export default {
+  props: ['authenticated'],
   data() {
     return {
       isOpen: false
@@ -41,6 +42,7 @@ export default {
 .topnav {
   overflow: hidden;
   background-color: #343a40;
+  height: 68px;
 }
 
 .topnav a {

@@ -19,6 +19,16 @@
 </template>
 
 <script>
+export default {
+  mounted() {
+    let that = this;
+    this.$http.get("/getAuthenticatedUser").then(data => {
+      if (data.body) {
+        that.$router.push("dashboard");
+      }
+    });
+  }
+};
 </script>
 
 <style scoped>
@@ -48,8 +58,6 @@
   padding: 20px;
 }
 
-
-
 .payment h3 {
   margin-bottom: 20px;
 }
@@ -63,9 +71,8 @@
 }
 
 .sign-up:hover {
-  background-color: #3C3C3C;
+  background-color: #3c3c3c;
 }
-
 </style>
 
 

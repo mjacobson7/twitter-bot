@@ -12,7 +12,7 @@
 
       <div class="step-wrapper">
         <div class="step-number" :class="{ 'active': activeStep === 2}">2</div>
-        <span class="step-description">Payment Info</span>
+        <span class="step-description">Payment</span>
       </div>
 
       <div class="step-wrapper">

@@ -7,13 +7,13 @@
       style="display: flex; justify-content: center; align-items: center; margin-top: 20px;"
     >
       <a class="twitter-login" href="/auth/twitter">
-        <i class="icon fa fa-twitter"></i>Start Winning!
+        <i class="icon fa fa-twitter"></i>Connect Twitter Account
       </a>
     </div>
 
-    <div class="payment-details-container" v-if="activeStep == 2" >
-      <h1 style="text-align: center; margin: 15px 0;">Welcome @{{user.username}}!</h1>
-      <h3 style="text-align: center; margin: 15px 0;">You're almost there!</h3>
+    <div class="payment-details-container" v-if="activeStep == 2">
+      <!-- <h1 style="text-align: center; margin: 15px 0;">Welcome @{{user.username}}!</h1>
+      <h3 style="text-align: center; margin: 15px 0;">You're almost there!</h3>-->
       <Stripe @paymentSuccess="onPaymentSuccess" @paymentFailure="onPaymentFailure"></Stripe>
       <p>{{error}}</p>
     </div>
@@ -22,6 +22,7 @@
       <p>Terms of use</p>
       <router-link to="/dashboard">Agree</router-link>
     </div>
+  </div>
 </template>
 
 <script>
@@ -51,10 +52,12 @@ export default {
     }
   },
   mounted() {
+    let that = this;
     this.$http.get("/getAuthenticatedUser").then(data => {
       if (data.body) {
         this.user = data.body;
         this.activeStep = 2;
+        // that.$router.push('dashboard');
       } else {
         this.activeStep = 1;
       }
@@ -109,9 +112,8 @@ export default {
   border-right: 1px solid #66abe1;
 }
 
-
 .payment-details-container {
-  max-width: 50%; 
+  max-width: 50%;
   margin: 0 auto;
 }
 
