@@ -54,6 +54,7 @@ export default {
       this.headerDropdownOpen = value;
     },
     logout() {
+      let that = this;
       this.$http.get("/logout").then(data => {
         that.$router.push("/login");
       });
