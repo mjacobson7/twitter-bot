@@ -1,11 +1,12 @@
 <template>
   <div style="background-color: #F4F6FC; position: relative;">
-    <Header :authenticated="true" @dropdown="onDropdownToggle"></Header>
+    <Header @dropdown="onDropdownToggle"></Header>
     <div
       v-bind:class="{active: headerDropdownOpen}"
       style="width: 177px; background-color: #343a40; position: absolute; top: 68px; right: 0; display: none;"
     >
-      <div class="header-dropdown-item">My Account</div>
+      <router-link to="/dashboard" class="header-dropdown-item">Dashboard</router-link>
+      <router-link to="/my-account" class="header-dropdown-item">My Account</router-link>
       <div @click="logout()" class="header-dropdown-item">Log Out</div>
     </div>
 
@@ -20,18 +21,25 @@
           <th scope="col">Followed</th>
         </tr>
       </thead>
-      <tbody v-for="contest in contests" :key="contest">
-        <tr>
-          <th scope="row">{{moment(contest.date).local().format('lll')}}</th>
-          <td data-title="Screen Name">@{{contest.screenName}}</td>
-          <td data-title="Tweet Link">
-            <a :href="'https://twitter.com/tweet/status/' + contest._id" target="_blank">Link</a>
-          </td>
-          <td data-title="Favorited">{{contest.favorited}}</td>
-          <td data-title="Retweeted">{{contest.retweeted}}</td>
-          <td data-title="Followed">{{contest.followed}}</td>
-        </tr>
-      </tbody>
+      <template v-if="contests.length > 0">
+        <tbody v-for="contest in contests" :key="contest">
+          <tr>
+            <th scope="row">{{moment(contest.date).local().format('lll')}}</th>
+            <td data-title="Screen Name">@{{contest.screenName}}</td>
+            <td data-title="Tweet Link">
+              <a :href="'https://twitter.com/tweet/status/' + contest._id" target="_blank">Link</a>
+            </td>
+            <td data-title="Favorited">{{contest.favorited}}</td>
+            <td data-title="Retweeted">{{contest.retweeted}}</td>
+            <td data-title="Followed">{{contest.followed}}</td>
+          </tr>
+        </tbody>
+      </template>
+      <template v-else>
+        <tbody>
+          <td colspan="6" style="border-bottom: none;"><h3>No Results</h3></td>
+        </tbody>
+      </template>
     </table>
   </div>
 </template>
@@ -78,6 +86,8 @@ export default {
   width: 100%;
   padding: 20px;
   cursor: pointer;
+  text-decoration: none;
+  display: block;
 }
 
 .header-dropdown-item:hover {

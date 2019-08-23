@@ -1,7 +1,7 @@
 <template>
   <div class="topnav">
-    <a v-if="authenticated" @click="toggleDropdown">
-      My Account
+    <a @click="toggleDropdown">
+      Account
       <img
         v-bind:class="{ active: isOpen }"
         class="dropdown-arrow"
@@ -13,7 +13,6 @@
 
 <script>
 export default {
-  props: ["authenticated"],
   data() {
     return {
       isOpen: false

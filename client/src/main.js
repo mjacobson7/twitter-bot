@@ -14,6 +14,7 @@ Vue.use(VueStripeCheckout, 'pk_test_LNjJFLPIJXHC0vhQLe5yR6d900GIABJ1vq');
 Vue.use(VueResource);
 
 const router = new VueRouter({routes})
+
 Vue.config.productionTip = false
 
 new Vue({
