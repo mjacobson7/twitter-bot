@@ -23,13 +23,12 @@ mongoose.connect(secrets.DATABASE_URL, { useNewUrlParser: true });
 //Cron Job
 require('./config/cron');
 
-//Passport
-require('./config/passport')(passport); // pass passport for configuration
-
-app.use(session({secret: secrets.SESSION_SECRET}));
+app.use(session({ secret: secrets.SESSION_SECRET }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 
+//Passport
+require('./config/passport')(passport); // pass passport for configuration
 
 //routes
 require('./routes')(app, passport);

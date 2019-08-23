@@ -1,9 +1,16 @@
 const secrets = require('./config/secrets');
 const stripe = require("stripe")(secrets.STRIPE_PRIVATE_KEY);
 const User = require('./models/User');
+const Contest = require('./models/Contest');
 
 
 module.exports = (app, passport) => {
+
+    app.get('/contests', isLoggedIn, (req, res) => {
+        Contest.find({ userId: req.user._id }).sort({ date: -1 }).then(contests => {
+            res.status(200).json(contests);
+        })
+    })
 
     // app.get('/botLists', isLoggedIn, (req, res) => {
     //     Bot.find({ userId: req.user.id }, (err, bots) => {
@@ -62,27 +69,56 @@ module.exports = (app, passport) => {
 
     })
 
+    app.get('/logout', (req, res) => {
+        req.logout();
+        res.status(200).send();
+    })
+
     app.get('/auth/twitter', passport.authenticate('twitter'));
 
-    app.get('/auth/twitter/callback', passport.authenticate('twitter', {
-        successRedirect: '/#/payment',
-        failureRedirect: '/'
-    }))
-    
-    app.post('/stripe', (req, res) => {
+    app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/' }), (req, res) => {
+        // successRedirect: '/#/payment',
 
-        stripe.customers.create({
-            source: req.body.id,
-            email: req.body.email
-        }).then(customer => {
-            stripe.subscriptions.create({
-                customer: customer.id,
-                items: [{
-                    plan: 'plan_FNkLKnVhooEeU7'
-                }]
-            }).then(data => res.status(200).json(data))
-        }).catch(err => console.log(err))
+        stripe.customers.retrieve(req.user.stripeId)
+            .then(customer => {
+                if (customer.subscriptions.total_count == 0) {
+                    res.redirect('/#/payment')
+                } else {
+                    res.redirect('/#/dashboard')
+                }
+            })
+    })
 
+    app.post('/charge', (req, res) => {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (re.test(String(req.body.email).toLowerCase())) {
+            stripe.customers.retrieve(req.user.stripeId)
+                .then(customer => {
+                    if (customer.subscriptions.total_count == 0) {
+                        stripe.customers.update(customer.id, { email: req.body.email }).then(() => {
+                            stripe.customers.createSource(customer.id, { source: req.body.token.id }).then(() => {
+                                stripe.subscriptions.create({
+                                    customer: customer.id,
+                                    items: [{
+                                        plan: 'plan_FNkLKnVhooEeU7'
+                                    }]
+                                }).then(() => res.status(200).send())
+                            })
+                        })
+                    } else {
+                        res.status(401).send('You already have an active subscription')
+                    }
+                })
+                .then(() => {
+                    res.status(200);
+                })
+                .catch(err => {
+                    console.log(err)
+                    res.status(400).send(err);
+                })
+        } else {
+            res.status(403).json({ message: 'Please include a valid email' })
+        }
 
     })
 
@@ -91,7 +127,6 @@ module.exports = (app, passport) => {
 
 const isLoggedIn = (req, res, next) => {
     if (req.isAuthenticated()) {
-        // req.session.touch();
         next();
     }
 }

@@ -5,8 +5,8 @@ const secrets = require('./secrets');
 var Twitter = require('twitter');
 
 
-// cron.schedule('0 4 * * *', async () => {
-(async () => {
+cron.schedule('0 4 * * *', async () => {
+// (async () => {
 
     console.log('Starting Twitter Bot...');
     const date = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Denver" }));
@@ -28,13 +28,13 @@ var Twitter = require('twitter');
                 access_token_secret: user.tokenSecret,
             });
 
-            const searchTerms = ["Retweet to win", "RT to win"]
+            const searchTerms = ['"Retweet to win"', '"RT to win"']
 
             let tweets = [];
 
             // Get tweets between yesterday and today with the search terms provided
             await Promise.all(searchTerms.map(async search => {
-                let retVal = await T.get('search/tweets', { q: `${search} -filter:retweets -filter:replies`, count: 10, lang: 'en', since: yesterday, until: today });
+                let retVal = await T.get('search/tweets', { q: `${search} -filter:retweets -filter:replies`, count: 400, lang: 'en', since: yesterday, until: today });
                 if (retVal.statuses.length > 0) {
                     tweets.push(...retVal.statuses);
                 }
@@ -80,7 +80,7 @@ var Twitter = require('twitter');
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
-                    }, 3000)
+                    }, 1000)
                 }
                 catch (err) {
                     throw err;
@@ -90,6 +90,8 @@ var Twitter = require('twitter');
             likeFollowRetweet();
 
             const createContestObject = async (tweet) => {
+                console.log('ID_STR: ' + tweet.id_str)
+                console.log('ID: ' + tweet.id)
                 const contest = new Contest();
                 contest._id = tweet.id_str;
                 contest.userId = user.id;
@@ -160,10 +162,10 @@ var Twitter = require('twitter');
             }
 
             const isBannedUser = async (tweet) => {
-                const bannedUsers = ['ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg']
+                const bannedUsers = ['ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph']
                 let bannedUsersCount = 0;
                 await Promise.all(bannedUsers.map(async bannedUser => {
-                    tweet.user.screen_name.includes(bannedUser) ? bannedUsersSum++ : ''
+                    tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : ''
                 }))
 
                 if (bannedUsersCount > 0) return true;
@@ -181,5 +183,5 @@ var Twitter = require('twitter');
 
     }))
 
-})()
-// }, { scheduled: true, timezone: "America/Denver" });
+// })()
+}, { scheduled: true, timezone: "America/Denver" });

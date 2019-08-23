@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 
 const contestSchema = mongoose.Schema({
-    _id: Number,
+    _id: String,
     userId: Number,
     screenName: String,
     text: String,
