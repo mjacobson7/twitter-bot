@@ -9,27 +9,29 @@ export default {};
 </script>
 
 <style>
-html, body {
-  background-color: #F5F6F7;
-}
-.sub-text {
-  color: #8a8a8a;
-  font-size: 14px;
-}
-
-.fs20 {
-  font-size: 20px;
-}
-.fs100 {
-  font-size: 100px;
+.button {
+  background-color: #0c83cc;
+  display: inline-block;
+  padding: 20px 50px;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
 }
 
-.pad20 {
-  padding: 20px;
-}
-
-.mar20b {
+.logo {
+  display: block;
+  margin: 0 auto;
+  width: 250px;
   margin-bottom: 20px;
+}
+
+.button:hover {
+  background-color: rgb(13, 98, 151);
+}
+
+html,
+body {
+  background-color: #f5f6f7;
 }
 
 /* http://meyerweb.com/eric/tools/css/reset/ 

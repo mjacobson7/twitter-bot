@@ -2,7 +2,7 @@
   <div>
     <Header :authenticated="false"></Header>
     <div class="login-box">
-      <h2>Login to goodBot</h2>
+      <img class="logo" src="../assets/myGoodBot.png"/>
       <a class="twitter-login" href="/auth/twitter">
         <i class="icon fa fa-twitter"></i>Login with Twitter
       </a>
@@ -31,7 +31,7 @@ export default {
   padding: 30px;
   position: relative;
   text-align: left;
-  width: 30vw;
+  max-width: 500px;
   margin: 100px auto;
 }
 
@@ -43,7 +43,6 @@ h2 {
 .twitter-login {
   transform: translateX(-50%);
   margin-left: 50%;
-  margin-top: 40px;
   margin-bottom: 20px;
   width: auto;
   display: inline-block;
