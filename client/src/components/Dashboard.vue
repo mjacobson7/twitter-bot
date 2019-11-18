@@ -38,7 +38,7 @@
 
         <div>
           <p class="question">Is this app safe?</p>
-          <p class="answer">This app is registered with Twitter and is in good standing. It is using the standard APIs provided by Twitter.  Many apps utilize this feature provided by Twitter and myGoodBot is no exception.  The only information this app stores about you is your username. To revoke this app from accessing your account, please contact me or navigate to twitter.com and go to Settings and Privacy > Apps and sessions and find for "myGoodBot".  Clicking on that will allow you to revoke all access.</p>
+          <p class="answer">This app is registered with Twitter and is in good standing. It is using the standard APIs provided by Twitter.  Many apps utilize this feature provided by Twitter and myGoodBot is no exception.  The only information this app stores about you is your username. To revoke this app from accessing your account, please contact me or navigate to twitter.com and go to Settings and Privacy > Apps and sessions and find for "myGoodBot".  Clicking on that will allow you to revoke all access. NOTE: If you revoke access to the app, the bot will stop immediately.  No refunds will be issues.</p>
         </div>
 
         <div>
