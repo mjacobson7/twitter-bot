@@ -1,78 +1,87 @@
 const cron = require('node-cron');
 const User = require('../models/User');
-const Contest = require('../models/Contest');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
+const moment = require('moment-timezone');
 
 
-cron.schedule('0 4 * * *', async () => {
-// (async () => {
 
+cron.schedule('0 */3 * * *', async () => {
+
+    // (async () => {
     console.log('Starting Twitter Bot...');
-    const date = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Denver" }));
-    const yesterday = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - 1}`;
-    const today = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-    const users = await User.find({})
-
+    const users = await User.find();
 
     await Promise.all(users.map(async user => {
 
-        if (!user.active) { //need to change this check to see if user is on time with payments or not or hasn't cancelled subscription
-            console.log(`Working on @${user.username}`)
+        console.log(`Working on @${user.username}`)
 
-            const T = new Twitter({
-                consumer_key: secrets.CONSUMER_KEY,
-                consumer_secret: secrets.CONSUMER_SECRET,
-                access_token_key: user.token,
-                access_token_secret: user.tokenSecret,
-            });
+        if (user.daysRemaining <= 0) return;
+        user.daysRemaining -= 1;
+        user.save();
 
-            const searchTerms = ['"Retweet to win"', '"RT to win"']
+        const T = new Twitter({
+            consumer_key: secrets.CONSUMER_KEY,
+            consumer_secret: secrets.CONSUMER_SECRET,
+            access_token_key: user.token,
+            access_token_secret: user.tokenSecret,
+        });
 
-            let tweets = [];
 
-            // Get tweets between yesterday and today with the search terms provided
-            await Promise.all(searchTerms.map(async search => {
-                let retVal = await T.get('search/tweets', { q: `${search} -filter:retweets -filter:replies`, count: 400, lang: 'en', since: yesterday, until: today });
-                if (retVal.statuses.length > 0) {
-                    tweets.push(...retVal.statuses);
+        let tweets = [];
+
+        const searchTweets = async () => {
+            const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
+
+            if (tweets.length > 1000) return;
+
+            if (tweets.length == 0) {
+                try {
+                    const results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
+                    if (results.statuses.length > 0) {
+                        tweets.push(...results.statuses);
+                        await searchTweets();
+                    }
+                } catch (err) {
+                    console.log(err)
                 }
-            }))
-            console.log(`Tweets Length: ${tweets.length}`)
+
+            } else {
+                const maxId = Math.max.apply(Math, tweets.map(tweet => { return tweet.id; }))
+                const results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxId });
+                if (results.statuses.length > 0) {
+                    tweets.push(...results.statuses);
+                    await searchTweets();
+                }
+            }
+        }
+
+        await searchTweets();
+
+        console.log(`Tweets Length: ${tweets.length}`)
+
+        if (tweets.length > 0) {
 
             var i = 0;
 
             const likeFollowRetweet = async () => {
                 try {
                     await setTimeout(async () => {
-                        const isDup = await isDuplicate(tweets[i]);
-                        if (!isDup) {
-                            const isBot = await isBotAccount(tweets[i]);
-                            if (!isBot) {
-                                const keywordBan = await hasBannedKeywords(tweets[i]);
-                                if (!keywordBan) {
-                                    const bannedUser = await isBannedUser(tweets[i]);
-                                    if (!bannedUser) {
-                                        let contest = await createContestObject(tweets[i]);
-                                        contestLiked = await like(contest, tweets[i]);
-                                        contestFollowed = await follow(contestLiked ? contestLiked : contest, tweets[i]);
-                                        contestRetweeted = await retweet(contestFollowed ? contestFollowed : contestLiked ? contestLiked : contest, tweets[i]);
+                        const isBot = await isBotAccount(tweets[i]);
+                        const keywordBan = await hasBannedKeywords(tweets[i]);
+                        const bannedUser = await isBannedUser(tweets[i]);
 
-                                        if (contestRetweeted) {
-                                            contest = await contestRetweeted.save();
-                                        } else if (contestFollowed) {
-                                            contest = await contestFollowed.save();
-                                        } else if (contestLiked) {
-                                            contest = await contestLiked.save();
-                                        } else {
-                                            contest = await contest.save();
-                                        }
+                        if (!isBot || !keywordBan || !bannedUser) {
 
-                                        console.log(contest)
-                                    };
-                                };
-                            };
+                            const liked = await like(tweets[i]);
+                            const followed = await follow(tweets[i]);
+                            const retweeted = await retweet(tweets[i]);
+
+                            if (liked || followed || retweeted) {
+                                user.contestsEntered++;
+                                user.save();
+                            }
                         };
 
                         i++;
@@ -80,7 +89,7 @@ cron.schedule('0 4 * * *', async () => {
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
-                    }, 1000)
+                    }, 3000)
                 }
                 catch (err) {
                     throw err;
@@ -89,58 +98,39 @@ cron.schedule('0 4 * * *', async () => {
 
             likeFollowRetweet();
 
-            const createContestObject = async (tweet) => {
-                console.log('ID_STR: ' + tweet.id_str)
-                console.log('ID: ' + tweet.id)
-                const contest = new Contest();
-                contest._id = tweet.id_str;
-                contest.userId = user.id;
-                contest.screenName = tweet.user.screen_name;
-                contest.text = tweet.text;
-                contest.date = new Date();
-                contest.followed = false;
-                contest.retweeted = false;
-                contest.favorited = false;
-                return await contest.save();
-            }
 
-            const like = async (contest, tweet) => {
+
+            const like = async (tweet) => {
                 try {
                     await T.post('favorites/create', { id: tweet.id_str })
-                    contest.favorited = true;
-                    return contest;
+                    return true;
                 }
                 catch (err) {
                     console.log(err);
+                    return false;
                 }
             }
 
-            const follow = async (contest, tweet) => {
+            const follow = async (tweet) => {
                 try {
                     await T.post('friendships/create', { screen_name: tweet.user.screen_name });
-                    contest.followed = true;
-                    return contest;
+                    return true;
                 }
                 catch (err) {
                     console.log(err);
+                    return false;
                 }
             }
 
-            const retweet = async (contest, tweet) => {
+            const retweet = async (tweet) => {
                 try {
                     await T.post('statuses/retweet/' + tweet.id_str, {});
-                    contest.retweeted = true;
-                    return contest;
+                    return true;
                 }
                 catch (err) {
                     console.log(err);
+                    return false;
                 }
-            }
-
-            const isDuplicate = async (tweet) => {
-                const contest = await Contest.findById(tweet.id_str);
-                if (contest) return true;
-                return false;
             }
 
             const isBotAccount = async (tweet) => {
@@ -162,7 +152,7 @@ cron.schedule('0 4 * * *', async () => {
             }
 
             const isBannedUser = async (tweet) => {
-                const bannedUsers = ['ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph']
+                const bannedUsers = ['bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter']
                 let bannedUsersCount = 0;
                 await Promise.all(bannedUsers.map(async bannedUser => {
                     tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : ''
@@ -173,15 +163,7 @@ cron.schedule('0 4 * * *', async () => {
             }
 
 
-
-
-
-
-
-
         }
-
     }))
-
-// })()
+    // })();
 }, { scheduled: true, timezone: "America/Denver" });

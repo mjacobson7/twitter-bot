@@ -21,7 +21,7 @@ app.use(cookieParser());
 mongoose.connect(secrets.DATABASE_URL, { useNewUrlParser: true });
 
 //Cron Job
-require('./config/cron');
+require('./config/cron')
 
 app.use(session({ secret: secrets.SESSION_SECRET }));
 app.use(passport.initialize());
@@ -39,7 +39,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist'));
 })
 
-const server = app.listen(8400, () => {
+const server = app.listen(8600, () => {
     const port = server.address().port;
     console.log(`Server listening on port: ${port}`);
 });

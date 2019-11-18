@@ -6,12 +6,9 @@ const userSchema = mongoose.Schema({
     _id: Number,
     token: String,
     tokenSecret: String,
-    stripeId: String,
     username: String,
-    name: String,
-    friendsCount: Number,
-    active: Boolean,
-    suspended: Boolean
+    daysRemaining: Number,
+    contestsEntered: Number
 });
 
 

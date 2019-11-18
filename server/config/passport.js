@@ -1,7 +1,6 @@
 const TwitterStrategy = require('passport-twitter').Strategy;
 const User = require('../models/User');
 const secrets = require('../config/secrets');
-const stripe = require("stripe")(secrets.STRIPE_PRIVATE_KEY);
 
 
 module.exports = passport => {
@@ -42,31 +41,25 @@ module.exports = passport => {
                         return done(null, user); // user found, return that user
                     } else {
                         // if there is no user, create them
+                        var newUser = new User();
 
-                        stripe.customers.create().then(customer => {
-                            console.log('customer', customer);
-                            var newUser = new User();
-
-                            // set all of the user data that we need
-                            newUser._id = profile.id;
-                            newUser.token = token;
-                            newUser.tokenSecret = tokenSecret;
-                            newUser.stripeId = customer.id;
-                            newUser.username = profile.username;
-                            newUser.name = profile.displayName;
-                            newUser.friendsCount = profile._json.friends_count;
-                            newUser.active = false;
-                            newUser.suspended = profile._json.suspended;
+                        // set all of the user data that we need
+                        newUser._id = profile.id;
+                        newUser.token = token;
+                        newUser.tokenSecret = tokenSecret;
+                        newUser.username = profile.username;
+                        newUser.daysRemaining = 0;
+                        newUser.contestsEntered = 0;
 
 
-                            // save our user into the database
-                            newUser.save(function (err) {
-                                if (err)
-                                    throw err;
-                                return done(null, newUser);
-                            });
+                        // save our user into the database
+                        newUser.save(function (err) {
+                            if (err)
+                                throw err;
+                            return done(null, newUser);
+                        });
 
-                        })
+
 
 
 
