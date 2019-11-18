@@ -28,7 +28,7 @@
 
         <div>
           <p class="question">Can you really win these giveaways?</p>
-          <p class="answer">Yes! Generally, I win something noteworthy once or twice per month.  Some of the prizes I've won include: shirts, sweaters, socks, books, signed sports memorabilia, jewlery, DVDs, action figues, games, etc. It's always a surprise to get a message on twitter to find out I won something that I had no idea I even was trying to win.</p>
+          <p class="answer">Yes! Generally, I win something noteworthy once or twice per month.  Some of the prizes I've won include: shirts, sweaters, socks, books, essential oils, signed sports memorabilia, jewlery, DVDs, action figues, games, etc. It's always a surprise to get a message on twitter to find out I won something that I had no idea I even was trying to win.</p>
         </div>
 
         <div>
@@ -52,11 +52,13 @@
             There is some important information that you need to consider, because it will affect how successful you are
             <ul style="list-style: unset;">
               <br/>
-              <li>Twitter will lock your account for the first couple of days of using this bot.  This is a precautionary measure, and it's because they don't want third-party apps (like this one) to abuse your account. If you have the twitter app, you should set all your notifications to 'on' so you can unlock the account ASAP.  Failure to do this can cause the bot to not work at all.  By signing up for this service, you agree to allow this app to like tweets, retweet tweets, and follow people automatically, many times per day. You also assume responsibility to unlock your account if it gets locked. After a few days, the locked account notifications should end and you can just focus on winning.</li>
+              <li>Twitter will most likely lock your account the first couple of times the bot runs.  This is a precautionary measure, and it's because they don't want third-party apps to abuse and spam your account. If you have the twitter app, you should set all your notifications to 'on' so you can be alerted if this happens and unlock the account ASAP.  Failure to do this can cause the bot to not work at all.  By signing up for this service, you agree to allow this app to like tweets, retweet tweets, and follow people automatically, many times per day. You also assume responsibility to unlock your account if it gets locked. After a few days, the locked account notifications should end and you can just focus on winning.</li>
               <br/>
               <li>If you use twitter for real, consider using a throw-away account.  People who follow you will get spammed by your contest entries (big time), and you may lose friends if done on your primary account.</li>
               <br/>
               <li>Twitter only allows you to follow 5,000 people (unless you have A LOT of followers).  At this point, the twitter bot will stop following people and you may miss out on some contests.  I generally do a purge on who I follow once I follow 5,000 accounts.</li>
+              <br/>
+              <li>Download the twitter app and keep notifications on.  Most contests will notify you by tagging you in a tweet and/or messaging you.  Most of the time they will ask you to message them.  If you get a message claiming you won something but the account isn't verified, or they didn't announce it publicly in a tweet, be cautious, as they may be trying to get your personal information.  After having used this app in the past year, I've been able to tweak it enough that I can bypass most all fake contests. There's still a chance people can attempt to scam you. Don't click on any links they message you if they seem suspicious. Please report all suspicious accounts so we can blacklist them from the app.</li>
             </ul>
           </p>
         </div>
@@ -121,6 +123,7 @@ export default {
   border-radius: 5px;
   border: 1px solid #dedede;
   max-width: 800px;
+  margin-bottom: 50px;
 }
 
 .dashboardData p {
