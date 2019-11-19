@@ -192,7 +192,7 @@ const hasBannedKeywords = async (tweet) => {
 }
 
 const isBannedUser = async (tweet) => {
-    const bannedUsers = ['TashaGiveaway', 'followandrt2win', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter']
+    const bannedUsers = ['timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'followandrt2win', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter']
     let bannedUsersCount = 0;
     await Promise.all(bannedUsers.map(async bannedUser => {
         tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : ''
