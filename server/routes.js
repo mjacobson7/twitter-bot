@@ -4,10 +4,15 @@ const User = require('./models/User');
 
 module.exports = (app, passport) => {
 
-    app.get('/signout', (req, res) => {
-        req.logout();
-        res.status(200).send();
-    });
+    app.get('/acceptTerms', (req, res) => {
+        if(req.user) {
+            req.user.termsAccepted = true;
+            req.user.termsAcceptedDate = new Date();
+            req.user.save().then(data => {
+                res.status(200).json(data);
+            })
+        }
+    })
 
     app.get('/userAuthenticated', (req, res) => {
         if (req.user) {
@@ -39,11 +44,4 @@ module.exports = (app, passport) => {
     }));
 
 
-}
-
-
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        next();
-    }
 }

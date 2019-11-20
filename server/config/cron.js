@@ -5,18 +5,16 @@ const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
 
-(async () => {
-// cron.schedule('0 0 * * *', async () => {
-    const users = await User.find({ daysRemaining: { $gt: 0 } })
+cron.schedule('0 0 * * *', async () => {
+    const users = await User.find({ daysRemaining: { $gte: 0 } })
     await Promise.all(users.map(async user => {
         user.daysRemaining -= 1;
         await user.save();
     }))
-})()
+})
 
 cron.schedule('0 5-23/2 * * *', async () => {
 
-    // (async () => {
     console.log('Starting Twitter Bot...');
 
     const contests = await Contest.findOne().sort({ created_at: 1 })
@@ -128,7 +126,6 @@ cron.schedule('0 3 * * *', async () => {
     }
 
     await searchTweets();
-    // })();
 
 }, { scheduled: true, timezone: "America/Denver" });
 

@@ -18,13 +18,6 @@ export default {};
   cursor: pointer;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto;
-  width: 250px;
-  margin-bottom: 20px;
-}
-
 .button:hover {
   background-color: rgb(13, 98, 151);
 }

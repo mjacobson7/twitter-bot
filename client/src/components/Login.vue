@@ -2,7 +2,6 @@
   <div>
     <Header :authenticated="false"></Header>
     <div class="login-box">
-      <img class="logo" src="../assets/myGoodBot.png"/>
       <a class="twitter-login" href="/auth/twitter">
         <i class="icon fa fa-twitter"></i>Login with Twitter
       </a>
@@ -28,10 +27,10 @@ export default {
   -moz-box-shadow: 0px 10px 50px -30px rgba(0, 0, 0, 1);
   box-shadow: 0px 10px 50px -30px rgba(0, 0, 0, 1);
   padding-left: 0px;
-  padding: 30px;
+  padding: 50px 30px;
   position: relative;
   text-align: left;
-  max-width: 500px;
+  max-width: 400px;
   margin: 100px auto;
 }
 
@@ -41,11 +40,9 @@ h2 {
 }
 
 .twitter-login {
-  transform: translateX(-50%);
-  margin-left: 50%;
-  margin-bottom: 20px;
-  width: auto;
-  display: inline-block;
+  display: block;
+  width: 50%;
+  margin: 0 auto;
   padding: 0 18px 0 6px;
   border: 0 none;
   border-radius: 5px;
@@ -54,11 +51,23 @@ h2 {
   color: white;
   height: 50px;
   line-height: 50px;
-  position: relative;
   text-align: left;
   background-color: #3b94d9;
   border: 1px solid #257abc;
 }
+
+@media(max-width: 400px) {
+  .twitter-login {
+    width: 60%;
+  }
+}
+
+@media(max-width: 500px) {
+  .twitter-login {
+    width: 50%;
+  }
+}
+
 .twitter-login:hover {
   text-decoration: none;
 }
