@@ -3,5 +3,7 @@ module.exports = {
     CONSUMER_SECRET: '',
     CALLBACK_URL: '',
     DATABASE_URL: '',
-    SESSION_SECRET: ''
+    SESSION_SECRET: '',
+    PERSONAL_KEY: '',
+    PERSONAL_SECRET: ''
 }

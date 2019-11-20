@@ -5,23 +5,26 @@ const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
 
+// Runs at midnight every day
 cron.schedule('0 0 * * *', async () => {
     const users = await User.find({ daysRemaining: { $gte: 0 } })
     await Promise.all(users.map(async user => {
         user.daysRemaining -= 1;
         await user.save();
     }))
-})
+}, { scheduled: true, timezone: "America/Denver" });
 
+
+// Runs every two hours (daily) starting at 2AM until 8PM 
 cron.schedule('0 5-23/2 * * *', async () => {
-
+    // (async () => {
     console.log('Starting Twitter Bot...');
 
     const contests = await Contest.findOne().sort({ created_at: 1 })
-    const tweets = contests.tweets;
+    const tweets = contests ? contests.tweets : [];
 
     if (tweets.length > 0) {
-        const users = await User.find({ daysRemaining: { $gt: 0 } })
+        const users = await User.find({ daysRemaining: { $gte: 0 } })
 
         await Promise.all(users.map(async user => {
 
@@ -39,15 +42,16 @@ cron.schedule('0 5-23/2 * * *', async () => {
             const likeFollowRetweet = async () => {
                 try {
                     await setTimeout(async () => {
-                        const isBot = await isBotAccount(tweets[i]);
-                        const keywordBan = await hasBannedKeywords(tweets[i]);
-                        const bannedUser = await isBannedUser(tweets[i]);
+                        let isBot = await isBotAccount(tweets[i]);
+                        let keywordBan = await hasBannedKeywords(tweets[i]);
+                        let bannedUser = await isBannedUser(tweets[i]);
 
                         if (!isBot || !keywordBan || !bannedUser) {
+                            let liked = await like(T, tweets[i]);
 
-                            const liked = await like(T, tweets[i]);
-                            const followed = await follow(T, tweets[i]);
-                            const retweeted = await retweet(T, tweets[i]);
+                            let followed = await follow(T, tweets[i]);
+
+                            let retweeted = await retweet(T, tweets[i]);
 
                             if (liked || followed || retweeted) {
                                 user.contestsEntered++;
@@ -60,7 +64,7 @@ cron.schedule('0 5-23/2 * * *', async () => {
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
-                    }, 10000)
+                    }, 5000)
                 }
                 catch (err) {
                     throw err;
@@ -76,17 +80,17 @@ cron.schedule('0 5-23/2 * * *', async () => {
 }, { scheduled: true, timezone: "America/Denver" });
 
 
-
-cron.schedule('0 3 * * *', async () => {
-    //     (async () => {
+// Runs every day at 1 AM
+cron.schedule('0 1 * * *', async () => {
+    // (async () => {
 
     console.log('Starting Twitter Bot...');
 
     const T = new Twitter({
         consumer_key: secrets.CONSUMER_KEY,
         consumer_secret: secrets.CONSUMER_SECRET,
-        access_token_key: '1043566169083367425-2oCYBWvpPNlJL6yQwVPmlIqMCnnXjL',
-        access_token_secret: 'ExMjcxXaRgnZ4qsxxcynKqOLjmXepZKImJqmdpSmGsF7C'
+        access_token_key: secrets.PERSONAL_KEY,
+        access_token_secret: secrets.PERSONAL_SECRET
     })
 
     let i = 0;
@@ -99,28 +103,46 @@ cron.schedule('0 3 * * *', async () => {
 
         if (i == 0) {
             try {
-                const results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
+                let results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
                 if (results.statuses.length > 0) {
                     let contest = new Contest();
                     contest.tweets = results.statuses;
                     i++;
                     await contest.save();
-                    await searchTweets();
+                    await setTimeout(async () => {
+                        await searchTweets();
+                    }, 1000)
+
                 }
             } catch (err) {
                 console.log(err)
             }
 
         } else {
-            const contests = await Contest.find().select("tweets.id");
-            const maxId = Math.max.apply(Math, contests[0].tweets.map(tweetId => { return tweetId.id; }))
-            const results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxId });
+            let contests = await Contest.find().select("tweets.id_str");
+
+            let test = contests.map(item => {
+                return item.tweets;
+            })
+
+            let flattened = test.reduce((a, b) => {
+                return a.concat(b);
+            });
+
+            let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
+            let maxIdMinusOne = decStrNum(maxId)
+            let results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+
             if (results.statuses.length > 0) {
                 let contest = new Contest();
                 contest.tweets = results.statuses;
                 i++;
                 await contest.save();
-                await searchTweets();
+
+                await setTimeout(async () => {
+                    await searchTweets();
+                }, 10000)
+
             }
         }
     }
@@ -128,6 +150,7 @@ cron.schedule('0 3 * * *', async () => {
     await searchTweets();
 
 }, { scheduled: true, timezone: "America/Denver" });
+// })()
 
 
 
@@ -136,6 +159,30 @@ cron.schedule('0 3 * * *', async () => {
 
 
 
+
+
+
+
+
+
+// HELPER FUNCTIONS
+
+function decStrNum(n) {
+    n = n.toString();
+    var result = n;
+    var i = n.length - 1;
+    while (i > -1) {
+        if (n[i] === "0") {
+            result = result.substring(0, i) + "9" + result.substring(i + 1);
+            i--;
+        }
+        else {
+            result = result.substring(0, i) + (parseInt(n[i], 10) - 1).toString() + result.substring(i + 1);
+            return result;
+        }
+    }
+    return result;
+}
 
 const like = async (T, tweet) => {
     try {
@@ -178,7 +225,7 @@ const isBotAccount = async (tweet) => {
 }
 
 const hasBannedKeywords = async (tweet) => {
-    const bannedDescriptionKeywords = ['sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
+    const bannedDescriptionKeywords = ['Taylor Swift', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
     let bannedKeywordCount = 0;
     await Promise.all(bannedDescriptionKeywords.map(async keyword => {
         tweet.user.description.includes(keyword) ? bannedKeywordCount++ : ''
@@ -189,10 +236,10 @@ const hasBannedKeywords = async (tweet) => {
 }
 
 const isBannedUser = async (tweet) => {
-    const bannedUsers = ['timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'followandrt2win', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter']
+    const bannedUsers = ['RelaxedReward', 'ilove70315673', 'FuckLymax', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'followandrt2win', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter'];
     let bannedUsersCount = 0;
     await Promise.all(bannedUsers.map(async bannedUser => {
-        tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : ''
+        tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : '';
     }))
 
     if (bannedUsersCount > 0) return true;
