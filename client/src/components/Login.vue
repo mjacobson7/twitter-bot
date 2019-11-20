@@ -56,15 +56,9 @@ h2 {
   border: 1px solid #257abc;
 }
 
-@media(max-width: 400px) {
+@media(max-width: 600px) {
   .twitter-login {
     width: 60%;
-  }
-}
-
-@media(max-width: 500px) {
-  .twitter-login {
-    width: 50%;
   }
 }
 

@@ -2,12 +2,13 @@
   <div class="topnav">
     <img class="header-logo-image" src="../assets/myGoodBot-image-white.png" />
     <img class="header-logo-text" src="../assets/myGoodBot-text-white.png" />
-    <span @click="logout" class="logout">Logout</span>
+    <span v-if="user" @click="logout" class="logout">Logout</span>
   </div>
 </template>
 
 <script>
 export default {
+  props: ['user'],
   methods: {
     logout() {
       this.$http.get("/logout").then(() => {

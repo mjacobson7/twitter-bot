@@ -1,6 +1,6 @@
 <template>
   <div style="background-color: #F4F6FC;">
-    <Header></Header>
+    <Header user="user"></Header>
     <div style class="dashboardData">
       <div>
         <div class="contestData" v-if="user">
@@ -315,14 +315,16 @@
           <p class="question">Is this app safe?</p>
           <p
             class="answer"
-          >This app is registered with Twitter and is in good standing. It is using the standard APIs provided by Twitter. Many apps utilize this feature provided by Twitter and myGoodBot is no exception. The only information this app stores about you is your twitter handle. To revoke this app from accessing your account, please contact me or navigate to twitter.com and go to Settings and Privacy > Apps and sessions and look for "myGoodBot". Clicking on that will allow you to revoke all access. NOTE: If you revoke access to the app, the bot will stop immediately. No refunds will be issued.</p>
+          >This app is registered with Twitter and is in good standing. It is using the standard APIs provided by Twitter. Many apps utilize this feature provided by Twitter and myGoodBot is no exception. The only information this app stores about you is your twitter handle. To revoke this app from accessing your account, please <a
+            href="mailto:mjacobson7@gmail.com"
+          >contact Me</a> or navigate to twitter.com and go to Settings and Privacy > Apps and sessions and look for "myGoodBot". Clicking on that will allow you to revoke all access. NOTE: If you revoke access to the app, the bot will stop immediately. No refunds will be issued.</p>
         </div>
 
         <div>
           <p class="question">How do I get started?</p>
           <p
             class="answer"
-          >If you've found this site, you most likely have my contact information (in which case, send me a message and we can get you started). At this time, I am limiting sign-ups until I can properly plan for the server power required.</p>
+          >In order to get started, you must <a href="mailto:mjacobson7@gmail.com">contact Me</a> directly. At this time, I am limiting sign-ups until I can properly plan for the server power required.</p>
         </div>
 
         <div>
