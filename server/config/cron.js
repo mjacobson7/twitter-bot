@@ -16,7 +16,7 @@ cron.schedule('0 0 * * *', async () => {
 
 
 // Runs every two hours (daily) starting at 2AM until 8PM 
-cron.schedule('0 5-23/2 * * *', async () => {
+cron.schedule('0 2-20/2 * * *', async () => {
     // (async () => {
     console.log('Starting Twitter Bot...');
 
