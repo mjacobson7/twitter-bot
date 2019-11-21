@@ -9,7 +9,6 @@ const cors = require('cors');
 const passport = require('passport');
 const secrets = require('./config/secrets');
 
-
 //Express Middleware
 app.use(bodyParser.json());
 app.use(cors());

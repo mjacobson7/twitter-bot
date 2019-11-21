@@ -1,10 +1,13 @@
 const cron = require('node-cron');
 const User = require('../models/User');
 const Contest = require('../models/Contest');
+const BannedUser = require('../models/BannedUser');
+const BannedDescription = require('../models/BannedDescription');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
 
+// Decrements days remaining for each user
 // Runs at midnight every day
 cron.schedule('0 0 * * *', async () => {
     const users = await User.find({ daysRemaining: { $gte: 0 } })
@@ -15,9 +18,10 @@ cron.schedule('0 0 * * *', async () => {
 }, { scheduled: true, timezone: "America/Denver" });
 
 
+// Likes, Follows, and Retweets
 // Runs every two hours (daily) starting at 2AM until 8PM 
 cron.schedule('0 2-20/2 * * *', async () => {
-    // (async () => {
+// (async () => {
     console.log('Starting Twitter Bot...');
 
     const contests = await Contest.findOne().sort({ created_at: 1 })
@@ -76,10 +80,17 @@ cron.schedule('0 2-20/2 * * *', async () => {
 
         await Contest.deleteOne({ _id: contests.id });
     }
-    // })();
+// })();
 }, { scheduled: true, timezone: "America/Denver" });
 
 
+
+
+
+
+
+
+// Get tweets for the day
 // Runs every day at 1 AM
 cron.schedule('0 1 * * *', async () => {
     // (async () => {
@@ -100,50 +111,38 @@ cron.schedule('0 1 * * *', async () => {
         const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
 
         if (i >= 10) return;
+        let results;
 
         if (i == 0) {
             try {
-                let results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
-                if (results.statuses.length > 0) {
-                    let contest = new Contest();
-                    contest.tweets = results.statuses;
-                    i++;
-                    await contest.save();
-                    await setTimeout(async () => {
-                        await searchTweets();
-                    }, 1000)
+                results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
 
-                }
             } catch (err) {
                 console.log(err)
             }
 
         } else {
             let contests = await Contest.find().select("tweets.id_str");
-
-            let test = contests.map(item => {
+            let contestTweets = contests.map(item => {
                 return item.tweets;
             })
-
-            let flattened = test.reduce((a, b) => {
+            let flattened = contestTweets.reduce((a, b) => {
                 return a.concat(b);
             });
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            let results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+        }
 
-            if (results.statuses.length > 0) {
-                let contest = new Contest();
-                contest.tweets = results.statuses;
-                i++;
-                await contest.save();
-
-                await setTimeout(async () => {
-                    await searchTweets();
-                }, 10000)
-
-            }
+        if (results.statuses.length > 0) {
+            let contest = new Contest();
+            contest.tweets = results.statuses;
+            i++;
+            await contest.save();
+            await setTimeout(async () => {
+                await searchTweets();
+            }, 10000)
         }
     }
 
@@ -225,23 +224,21 @@ const isBotAccount = async (tweet) => {
 }
 
 const hasBannedKeywords = async (tweet) => {
-    const bannedDescriptionKeywords = ['Taylor Swift', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy']
+    const bannedDescriptionKeywords = await BannedDescription.find();
     let bannedKeywordCount = 0;
-    await Promise.all(bannedDescriptionKeywords.map(async keyword => {
-        tweet.user.description.includes(keyword) ? bannedKeywordCount++ : ''
-    }))
-
+    bannedDescriptionKeywords[0].descriptions.map(keyword => {
+        tweet.user.description.toLowerCase().includes(keyword.toLowerCase()) ? bannedKeywordCount++ : ''
+    })
     if (bannedKeywordCount > 0) true;
     return false;
 }
 
 const isBannedUser = async (tweet) => {
-    const bannedUsers = ['RelaxedReward', 'ilove70315673', 'FuckLymax', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'followandrt2win', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter'];
+    const bannedUsers = await BannedUser.find();
     let bannedUsersCount = 0;
-    await Promise.all(bannedUsers.map(async bannedUser => {
-        tweet.user.screen_name.includes(bannedUser) ? bannedUsersCount++ : '';
-    }))
-
+    bannedUsers[0].users.map(bannedUser => {
+        tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase()) ? bannedUsersCount++ : '';
+    })
     if (bannedUsersCount > 0) return true;
     return false;
 }
