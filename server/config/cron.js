@@ -21,7 +21,7 @@ cron.schedule('0 0 * * *', async () => {
 // Likes, Follows, and Retweets
 // Runs every two hours (daily) starting at 2AM until 8PM 
 cron.schedule('0 2-20/2 * * *', async () => {
-// (async () => {
+    // (async () => {
     console.log('Starting Twitter Bot...');
 
     const contests = await Contest.findOne().sort({ created_at: 1 })
@@ -46,11 +46,12 @@ cron.schedule('0 2-20/2 * * *', async () => {
             const likeFollowRetweet = async () => {
                 try {
                     await setTimeout(async () => {
-                        let isBot = await isBotAccount(tweets[i]);
+                        let isBot = isBotAccount(tweets[i]);
                         let keywordBan = await hasBannedKeywords(tweets[i]);
                         let bannedUser = await isBannedUser(tweets[i]);
+                        let bannedContent = await hasBannedContent(tweets[i]);
 
-                        if (!isBot || !keywordBan || !bannedUser) {
+                        if (!isBot && !keywordBan && !bannedUser && !bannedContent) {
                             let liked = await like(T, tweets[i]);
 
                             let followed = await follow(T, tweets[i]);
@@ -80,8 +81,12 @@ cron.schedule('0 2-20/2 * * *', async () => {
 
         await Contest.deleteOne({ _id: contests.id });
     }
-// })();
+    // })();
 }, { scheduled: true, timezone: "America/Denver" });
+
+
+
+
 
 
 
@@ -115,7 +120,7 @@ cron.schedule('0 1 * * *', async () => {
 
         if (i == 0) {
             try {
-                results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
+                results = await T.get('search/tweets', { q: 'retweet to win -filter:replies -filter:retweets since:' + yesterday, count: 100 });
 
             } catch (err) {
                 console.log(err)
@@ -132,7 +137,7 @@ cron.schedule('0 1 * * *', async () => {
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            results = await T.get('search/tweets', { q: 'retweet to win -filter:replies -filter:retweets since:' + yesterday, count: 100, max_id: maxIdMinusOne });
         }
 
         if (results.statuses.length > 0) {
@@ -150,7 +155,6 @@ cron.schedule('0 1 * * *', async () => {
 
 }, { scheduled: true, timezone: "America/Denver" });
 // })()
-
 
 
 
@@ -184,39 +188,51 @@ function decStrNum(n) {
 }
 
 const like = async (T, tweet) => {
-    try {
-        await T.post('favorites/create', { id: tweet.id_str })
-        return true;
-    }
-    catch (err) {
-        console.log(err);
+    if (!tweet.favorited) {
+        try {
+            await T.post('favorites/create', { id: tweet.id_str })
+            return true;
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
+    } else {
         return false;
     }
 }
 
 const follow = async (T, tweet) => {
-    try {
-        await T.post('friendships/create', { screen_name: tweet.user.screen_name });
-        return true;
-    }
-    catch (err) {
-        console.log(err);
+    if (!tweet.user.following) {
+        try {
+            await T.post('friendships/create', { screen_name: tweet.user.screen_name });
+            return true;
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
+    } else {
         return false;
     }
 }
 
 const retweet = async (T, tweet) => {
-    try {
-        await T.post('statuses/retweet/' + tweet.id_str, {});
-        return true;
-    }
-    catch (err) {
-        console.log(err);
+    if (!tweet.retweeted) {
+        try {
+            await T.post('statuses/retweet/' + tweet.id_str, {});
+            return true;
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
+    } else {
         return false;
     }
 }
 
-const isBotAccount = async (tweet) => {
+const isBotAccount = (tweet) => {
     if ((tweet.user.screen_name).toLowerCase().includes('bot') || (tweet.user.screen_name).toLowerCase().includes('b0t') || (tweet.user.screen_name).toLowerCase().includes('spam') || (tweet.user.screen_name).toLowerCase().includes('spot') || (tweet.user.name).toLowerCase().includes('bot') || (tweet.user.name).toLowerCase().includes('b0t') || (tweet.user.name).toLowerCase().includes('spam') || (tweet.user.name).toLowerCase().includes('spot')) {
         return true;
     }
@@ -229,8 +245,7 @@ const hasBannedKeywords = async (tweet) => {
     bannedDescriptionKeywords[0].descriptions.map(keyword => {
         tweet.user.description.toLowerCase().includes(keyword.toLowerCase()) ? bannedKeywordCount++ : ''
     })
-    if (bannedKeywordCount > 0) true;
-    return false;
+    bannedKeywordCount > 0 ? true : false;
 }
 
 const isBannedUser = async (tweet) => {
@@ -239,6 +254,16 @@ const isBannedUser = async (tweet) => {
     bannedUsers[0].users.map(bannedUser => {
         tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase()) ? bannedUsersCount++ : '';
     })
-    if (bannedUsersCount > 0) return true;
-    return false;
+    bannedUsersCount > 0 ? true : false;
+}
+
+const hasBannedContent = (tweet) => {
+    const bannedContent = ['taylor swift', 'iphone', 'me win', 'paypal', 'bot'];
+    let bannedContentCount = 0;
+
+    bannedContent.map(content => {
+        let res = tweet.text.toLowerCase().includes(content);
+        res ? bannedContentCount++ : '';
+    })
+    bannedContentCount > 0 ? true: false;
 }
