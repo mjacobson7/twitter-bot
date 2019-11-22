@@ -6,7 +6,7 @@
         <div class="contestData" v-if="user">
           <p>User: {{user.username}}</p>
           <p>Days Remaining: {{user.daysRemaining}}</p>
-          <p>Contests Entered: {{user.contestsEntered}}</p>
+          <p>Contests Entered Today: {{user.contestsEntered}}</p>
           <div @click="showFaq = true;" class="button" style="margin-top: 10px">FAQ</div>
           <span @click="showPrivacyPolicy = true;" class="privacy-policy">Privacy Policy</span>
         </div>

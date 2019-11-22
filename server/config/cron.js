@@ -13,6 +13,7 @@ cron.schedule('0 0 * * *', async () => {
     const users = await User.find({ daysRemaining: { $gte: 0 } })
     await Promise.all(users.map(async user => {
         user.daysRemaining -= 1;
+        user.contestsEntered = 0;
         await user.save();
     }))
 }, { scheduled: true, timezone: "America/Denver" });
