@@ -1,8 +1,6 @@
 const cron = require('node-cron');
 const User = require('../models/User');
 const Contest = require('../models/Contest');
-const BannedUser = require('../models/BannedUser');
-const BannedDescription = require('../models/BannedDescription');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
@@ -48,11 +46,11 @@ cron.schedule('0 2-20/2 * * *', async () => {
                 try {
                     await setTimeout(async () => {
                         let isBot = isBotAccount(tweets[i]);
-                        let keywordBan = await hasBannedKeywords(tweets[i]);
-                        let bannedUser = await isBannedUser(tweets[i]);
-                        let bannedContent = await hasBannedContent(tweets[i]);
+                        let bannedDescription = hasBannedDescription(tweets[i]);
+                        let bannedUser = isBannedUser(tweets[i]);
+                        let bannedContent = hasBannedContent(tweets[i]);
 
-                        if (!isBot && !keywordBan && !bannedUser && !bannedContent) {
+                        if (!isBot && !bannedDescription && !bannedUser && !bannedContent) {
 
                             let liked = await like(T, tweets[i]);
 
@@ -71,7 +69,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
-                    }, 4000)
+                    }, 0)
                 }
                 catch (err) {
                     throw err;
@@ -172,23 +170,6 @@ cron.schedule('0 1 * * *', async () => {
 
 // HELPER FUNCTIONS
 
-function decStrNum(n) {
-    n = n.toString();
-    var result = n;
-    var i = n.length - 1;
-    while (i > -1) {
-        if (n[i] === "0") {
-            result = result.substring(0, i) + "9" + result.substring(i + 1);
-            i--;
-        }
-        else {
-            result = result.substring(0, i) + (parseInt(n[i], 10) - 1).toString() + result.substring(i + 1);
-            return result;
-        }
-    }
-    return result;
-}
-
 const like = async (T, tweet) => {
     if (!tweet.favorited) {
         try {
@@ -235,41 +216,61 @@ const retweet = async (T, tweet) => {
 }
 
 const isBotAccount = (tweet) => {
-    if ((tweet.user.screen_name).toLowerCase().includes('bot') || (tweet.user.screen_name).toLowerCase().includes('b0t') || (tweet.user.screen_name).toLowerCase().includes('spam') || (tweet.user.screen_name).toLowerCase().includes('spot') || (tweet.user.name).toLowerCase().includes('bot') || (tweet.user.name).toLowerCase().includes('b0t') || (tweet.user.name).toLowerCase().includes('spam') || (tweet.user.name).toLowerCase().includes('spot')) {
-        return true;
-    }
-    return false;
+    const botNames = ['bot', 'b0t', 'spam', 'spot'];
+    return botNames.reduce((val, name) => {
+        if (tweet.user.screen_name.toLowerCase().includes(name) || tweet.user.name.toLowerCase().includes(name)) {
+            val = true;
+        }
+        return val;
+    }, false)
 }
 
-const hasBannedKeywords = async (tweet) => {
-    const bannedDescriptionKeywords = await BannedDescription.find();
-    let bannedKeywordCount = 0;
-    bannedDescriptionKeywords[0].descriptions.map(keyword => {
-        let res = tweet.user.description.toLowerCase().includes(keyword.toLowerCase())
-        res ? bannedKeywordCount++ : ''
-    })
-    bannedKeywordCount > 0 ? true : false;
+const hasBannedDescription = (tweet) => {
+    const keywords = ['taylor swift', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'ariana', 'iphone', 'whatsapp'];
+
+    return keywords.reduce((val, keyword) => {
+        if (tweet.user.description.toLowerCase().includes(keyword)) {
+            val = true;
+        }
+        return val;
+    }, false)
 }
 
-const isBannedUser = async (tweet) => {
-    const bannedUsers = await BannedUser.find();
-    let bannedUsersCount = 0;
-    bannedUsers[0].users.map(bannedUser => {
-        let res = tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase());
-        res ? bannedUsersCount++ : '';
-    })
+const isBannedUser = (tweet) => {
+    const bannedUsers = ['GIVEAWAY_2006', 'RelaxedReward', 'FuckLymax', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'b0ttem', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
-    bannedUsersCount > 0 ? true : false;
+    return bannedUsers.reduce((val, bannedUser) => {
+        if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
+            val = true;
+        }
+        return val;
+    }, false)
 }
 
 const hasBannedContent = (tweet) => {
-    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot'];
-    let bannedContentCount = 0;
+    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot', '$1000', 'whatsapp'];
 
-    bannedContent.map(content => {
-        let res = tweet.text.toLowerCase().includes(content);
-        res ? bannedContentCount++ : '';
-    })
+    return bannedContent.reduce((val, content) => {
+        if (tweet.text.toLowerCase().includes(content)) {
+            val = true;
+        }
+        return val;
+    }, false)
+}
 
-    bannedContentCount > 0 ? true: false;
+function decStrNum(n) {
+    n = n.toString();
+    var result = n;
+    var i = n.length - 1;
+    while (i > -1) {
+        if (n[i] === "0") {
+            result = result.substring(0, i) + "9" + result.substring(i + 1);
+            i--;
+        }
+        else {
+            result = result.substring(0, i) + (parseInt(n[i], 10) - 1).toString() + result.substring(i + 1);
+            return result;
+        }
+    }
+    return result;
 }
