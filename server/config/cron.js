@@ -53,6 +53,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
                         let bannedContent = await hasBannedContent(tweets[i]);
 
                         if (!isBot && !keywordBan && !bannedUser && !bannedContent) {
+
                             let liked = await like(T, tweets[i]);
 
                             let followed = await follow(T, tweets[i]);
@@ -70,7 +71,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
-                    }, 5000)
+                    }, 4000)
                 }
                 catch (err) {
                     throw err;
@@ -244,7 +245,8 @@ const hasBannedKeywords = async (tweet) => {
     const bannedDescriptionKeywords = await BannedDescription.find();
     let bannedKeywordCount = 0;
     bannedDescriptionKeywords[0].descriptions.map(keyword => {
-        tweet.user.description.toLowerCase().includes(keyword.toLowerCase()) ? bannedKeywordCount++ : ''
+        let res = tweet.user.description.toLowerCase().includes(keyword.toLowerCase())
+        res ? bannedKeywordCount++ : ''
     })
     bannedKeywordCount > 0 ? true : false;
 }
@@ -253,18 +255,21 @@ const isBannedUser = async (tweet) => {
     const bannedUsers = await BannedUser.find();
     let bannedUsersCount = 0;
     bannedUsers[0].users.map(bannedUser => {
-        tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase()) ? bannedUsersCount++ : '';
+        let res = tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase());
+        res ? bannedUsersCount++ : '';
     })
+
     bannedUsersCount > 0 ? true : false;
 }
 
 const hasBannedContent = (tweet) => {
-    const bannedContent = ['taylor swift', 'iphone', 'me win', 'paypal', 'bot'];
+    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot'];
     let bannedContentCount = 0;
 
     bannedContent.map(content => {
         let res = tweet.text.toLowerCase().includes(content);
         res ? bannedContentCount++ : '';
     })
+
     bannedContentCount > 0 ? true: false;
 }
