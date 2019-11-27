@@ -120,8 +120,7 @@ cron.schedule('0 1 * * *', async () => {
 
         if (i == 0) {
             try {
-                results = await T.get('search/tweets', { q: 'retweet to win -filter:replies -filter:retweets since:' + yesterday, count: 100 });
-
+                results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100 });
             } catch (err) {
                 console.log(err)
             }
@@ -227,7 +226,7 @@ const isBotAccount = (tweet) => {
 }
 
 const hasBannedDescription = (tweet) => {
-    const keywords = ['taylor swift', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'ariana', 'iphone', 'whatsapp'];
+    const keywords = ['corruption', 'taylor swift', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'ariana', 'iphone', 'whatsapp'];
 
     return keywords.reduce((val, keyword) => {
         if (tweet.user.description.toLowerCase().includes(keyword)) {
@@ -238,7 +237,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['GIVEAWAY_2006', 'RelaxedReward', 'FuckLymax', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'b0ttem', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'FuckLymax', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'b0ttem', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
