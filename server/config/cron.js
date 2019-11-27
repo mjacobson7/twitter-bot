@@ -248,7 +248,7 @@ const isBannedUser = (tweet) => {
 }
 
 const hasBannedContent = (tweet) => {
-    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp'];
+    const bannedContent = ['proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp'];
 
     return bannedContent.reduce((val, content) => {
         if (tweet.text.toLowerCase().includes(content)) {
