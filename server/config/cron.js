@@ -137,10 +137,11 @@ cron.schedule('0 1 * * *', async () => {
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            results = await T.get('search/tweets', { q: 'retweet to win -filter:replies -filter:retweets since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            results = await T.get('search/tweets', { q: 'retweet to win since:' + yesterday, count: 100, max_id: maxIdMinusOne });
         }
 
-        if (results.statuses.length > 0) {
+        if (results.statuses.length > 0 && !results.statuses.retweeted_status) {
+            console.log(results.statuses)
             let contest = new Contest();
             contest.tweets = results.statuses;
             i++;
@@ -248,7 +249,7 @@ const isBannedUser = (tweet) => {
 }
 
 const hasBannedContent = (tweet) => {
-    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot', '$1000', 'whatsapp'];
+    const bannedContent = ['taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp'];
 
     return bannedContent.reduce((val, content) => {
         if (tweet.text.toLowerCase().includes(content)) {
