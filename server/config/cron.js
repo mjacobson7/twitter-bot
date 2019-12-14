@@ -49,8 +49,10 @@ cron.schedule('0 2-20/2 * * *', async () => {
                         let bannedDescription = hasBannedDescription(tweets[i]);
                         let bannedUser = isBannedUser(tweets[i]);
                         let bannedContent = hasBannedContent(tweets[i]);
+                        let followerThreshold = has100Followers(tweets[i])
 
-                        if (!isBot && !bannedDescription && !bannedUser && !bannedContent) {
+
+                        if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
 
                             await like(T, tweets[i]);
                             await follow(T, tweets[i]);
@@ -118,7 +120,7 @@ cron.schedule('0 1 * * *', async () => {
 
         if (i == 0) {
             try {
-                results = await T.get('search/tweets', { q: 'retweet to win -filter:retweets since:' + yesterday, count: 100 });
+                results = await T.get('search/tweets', { q: '"retweet to win" since:' + yesterday, count: 100 });
             } catch (err) {
                 console.log(err)
             }
@@ -134,7 +136,7 @@ cron.schedule('0 1 * * *', async () => {
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            results = await T.get('search/tweets', { q: 'retweet to win -filter:retweets since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            results = await T.get('search/tweets', { q: '"retweet to win" since:' + yesterday, count: 100, max_id: maxIdMinusOne });
         }
 
         if (results.statuses.length > 0 && !results.statuses.retweeted_status) {
@@ -234,7 +236,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['cashdadscotland', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['bloggeryanke', 'ukgovcoverup','cashdadscotland', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -245,7 +247,7 @@ const isBannedUser = (tweet) => {
 }
 
 const hasBannedContent = (tweet) => {
-    const bannedContent = ['trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp'];
+    const bannedContent = ['trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
 
     return bannedContent.reduce((val, content) => {
         if (tweet.text.toLowerCase().includes(content)) {
@@ -254,6 +256,8 @@ const hasBannedContent = (tweet) => {
         return val;
     }, false)
 }
+
+const has100Followers = (tweet) => tweet.user.followers_count >= 100;
 
 function decStrNum(n) {
     n = n.toString();
