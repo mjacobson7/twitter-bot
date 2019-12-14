@@ -120,23 +120,19 @@ cron.schedule('0 1 * * *', async () => {
 
         if (i == 0) {
             try {
-                results = await T.get('search/tweets', { q: '"retweet to win" since:' + yesterday, count: 100 });
+                results = await T.get('search/tweets', { q: '"retweet to win" -filter:retweets since:' + yesterday, count: 100 });
             } catch (err) {
                 console.log(err)
             }
 
         } else {
             let contests = await Contest.find().select("tweets.id_str");
-            let contestTweets = contests.map(item => {
-                return item.tweets;
-            })
-            let flattened = contestTweets.reduce((a, b) => {
-                return a.concat(b);
-            });
+            let contestTweets = contests.map(item => item.tweets)
+            let flattened = contestTweets.reduce((a, b) => a.concat(b));
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            results = await T.get('search/tweets', { q: '"retweet to win" since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            results = await T.get('search/tweets', { q: '"retweet to win" -filter:retweets since:' + yesterday, count: 100, max_id: maxIdMinusOne });
         }
 
         if (results.statuses.length > 0 && !results.statuses.retweeted_status) {
@@ -236,7 +232,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['bloggeryanke', 'ukgovcoverup','cashdadscotland', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['magic2192', 'mynameispaul','amariaajin','luisgp51', 'bloggeryanke', 'ukgovcoverup','cashdadscotland', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
