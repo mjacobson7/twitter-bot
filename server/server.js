@@ -22,7 +22,11 @@ mongoose.connect(secrets.DATABASE_URL, { useNewUrlParser: true });
 //Cron Job
 require('./config/cron')
 
-app.use(session({ secret: secrets.SESSION_SECRET }));
+app.use(session({ 
+    secret: secrets.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true
+ }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 
