@@ -98,7 +98,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
 // Get tweets for the day
 // Runs every day at 1 AM
 cron.schedule('0 1 * * *', async () => {
-    // (async () => {
+// (async () => {
 
     console.log('Starting Twitter Bot...');
 
@@ -112,15 +112,19 @@ cron.schedule('0 1 * * *', async () => {
     let i = 0;
     Contest.collection.deleteMany({});
 
+    const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
+    const query = queryBuilder(yesterday);
+
+
     const searchTweets = async () => {
-        const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
+
 
         if (i >= 10) return;
         let results;
 
         if (i == 0) {
             try {
-                results = await T.get('search/tweets', { q: '"retweet to win" -filter:retweets since:' + yesterday, count: 100 });
+                results = await T.get('search/tweets', { q: query, count: 100 });
             } catch (err) {
                 console.log(err)
             }
@@ -132,10 +136,14 @@ cron.schedule('0 1 * * *', async () => {
 
             let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
             let maxIdMinusOne = decStrNum(maxId)
-            results = await T.get('search/tweets', { q: '"retweet to win" -filter:retweets since:' + yesterday, count: 100, max_id: maxIdMinusOne });
+            try {
+                results = await T.get('search/tweets', { q: query, count: 100, max_id: maxIdMinusOne });
+            } catch (err) {
+                console.log(err)
+            }
         }
 
-        if (results.statuses.length > 0 && !results.statuses.retweeted_status) {
+        if (results && results.statuses.length > 0 && !results.statuses.retweeted_status) {
             let contest = new Contest();
             contest.tweets = results.statuses;
             i++;
@@ -148,7 +156,7 @@ cron.schedule('0 1 * * *', async () => {
 
     await searchTweets();
 
-}, { scheduled: true, timezone: "America/Denver" });
+    }, { scheduled: true, timezone: "America/Denver" });
 // })()
 
 
@@ -160,10 +168,12 @@ cron.schedule('0 1 * * *', async () => {
 
 
 
-
-
-
 // HELPER FUNCTIONS
+
+function queryBuilder(yesterday) {
+    const bannedUsers = ['justicerebooted', 'ukgovcoverup', 'lion_of_judah2k', 'bbc_thismorning', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'BotSp0tterBot', 'bottybotbotl', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'b0ttt0m', 'retweeejt']
+    return bannedUsers.reduce((arr, currUser) => `${arr} -from:${currUser}`, `"retweet to win" -filter:retweets -filter:nativeretweets -filter:replies filter:safe since:${yesterday}`);
+}
 
 const like = async (T, tweet) => {
     if (!tweet.favorited) {
@@ -232,7 +242,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['magic2192', 'mynameispaul','amariaajin','luisgp51', 'bloggeryanke', 'ukgovcoverup','cashdadscotland', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -271,3 +281,9 @@ function decStrNum(n) {
     }
     return result;
 }
+
+
+
+
+
+
