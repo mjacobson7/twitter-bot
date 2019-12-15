@@ -45,27 +45,15 @@ cron.schedule('0 2-20/2 * * *', async () => {
             const likeFollowRetweet = async () => {
                 try {
                     await setTimeout(async () => {
-                        let isBot = isBotAccount(tweets[i]);
-                        let bannedDescription = hasBannedDescription(tweets[i]);
-                        let bannedUser = isBannedUser(tweets[i]);
-                        let bannedContent = hasBannedContent(tweets[i]);
-                        let followerThreshold = has100Followers(tweets[i])
+                        await like(T, tweets[i]);
+                        await follow(T, tweets[i]);
+                        let retweeted = await retweet(T, tweets[i]);
 
-
-                        if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
-
-                            await like(T, tweets[i]);
-                            await follow(T, tweets[i]);
-                            let retweeted = await retweet(T, tweets[i]);
-
-                            if (retweeted) {
-                                user.contestsEntered++;
-                                await user.save();
-                            }
-                        };
-
+                        if (retweeted) {
+                            user.contestsEntered++;
+                            await user.save();
+                        }
                         i++;
-
                         if (i < tweets.length) {
                             likeFollowRetweet();
                         }
@@ -75,10 +63,8 @@ cron.schedule('0 2-20/2 * * *', async () => {
                     throw err;
                 }
             }
-
             await likeFollowRetweet();
         }))
-
         await Contest.deleteOne({ _id: contests.id });
     }
     // })();
@@ -98,7 +84,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
 // Get tweets for the day
 // Runs every day at 1 AM
 cron.schedule('0 1 * * *', async () => {
-// (async () => {
+    // (async () => {
 
     console.log('Starting Twitter Bot...');
 
@@ -113,7 +99,7 @@ cron.schedule('0 1 * * *', async () => {
     Contest.collection.deleteMany({});
 
     const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
-    const query = queryBuilder(yesterday);
+    const query = `retweet to win -filter:retweets -filter:replies filter:safe since:${yesterday}`;
 
 
     const searchTweets = async () => {
@@ -144,8 +130,23 @@ cron.schedule('0 1 * * *', async () => {
         }
 
         if (results && results.statuses.length > 0 && !results.statuses.retweeted_status) {
+
+            const tweetArr = results.statuses.reduce((arr, tweet) => {
+                let isBot = isBotAccount(tweet);
+                let bannedDescription = hasBannedDescription(tweet);
+                let bannedUser = isBannedUser(tweet);
+                let bannedContent = hasBannedContent(tweet);
+                let followerThreshold = has100Followers(tweet);
+
+                if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
+                    arr.push(tweet);
+                }
+                return arr;
+            }, [])
+
+
             let contest = new Contest();
-            contest.tweets = results.statuses;
+            contest.tweets = tweetArr;
             i++;
             await contest.save();
             await setTimeout(async () => {
@@ -156,7 +157,7 @@ cron.schedule('0 1 * * *', async () => {
 
     await searchTweets();
 
-    }, { scheduled: true, timezone: "America/Denver" });
+}, { scheduled: true, timezone: "America/Denver" });
 // })()
 
 
@@ -169,11 +170,6 @@ cron.schedule('0 1 * * *', async () => {
 
 
 // HELPER FUNCTIONS
-
-function queryBuilder(yesterday) {
-    const bannedUsers = ['justicerebooted', 'ukgovcoverup', 'lion_of_judah2k', 'bbc_thismorning', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'BotSp0tterBot', 'bottybotbotl', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'b0ttt0m', 'retweeejt']
-    return bannedUsers.reduce((arr, currUser) => `${arr} -from:${currUser}`, `retweet to win -filter:retweets -filter:nativeretweets -filter:replies filter:safe since:${yesterday}`);
-}
 
 const like = async (T, tweet) => {
     if (!tweet.favorited) {
@@ -242,7 +238,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
