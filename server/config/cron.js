@@ -172,7 +172,7 @@ cron.schedule('0 1 * * *', async () => {
 
 function queryBuilder(yesterday) {
     const bannedUsers = ['justicerebooted', 'ukgovcoverup', 'lion_of_judah2k', 'bbc_thismorning', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'BotSp0tterBot', 'bottybotbotl', 'jflessauSpam', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'b0ttt0m', 'retweeejt']
-    return bannedUsers.reduce((arr, currUser) => `${arr} -from:${currUser}`, `"retweet to win" -filter:retweets -filter:nativeretweets -filter:replies filter:safe since:${yesterday}`);
+    return bannedUsers.reduce((arr, currUser) => `${arr} -from:${currUser}`, `retweet to win -filter:retweets -filter:nativeretweets -filter:replies filter:safe since:${yesterday}`);
 }
 
 const like = async (T, tweet) => {
