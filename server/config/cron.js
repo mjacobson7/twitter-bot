@@ -84,7 +84,7 @@ cron.schedule('0 2-20/2 * * *', async () => {
 // Get tweets for the day
 // Runs every day at 1 AM
 cron.schedule('0 1 * * *', async () => {
-    // (async () => {
+// (async () => {
 
     console.log('Starting Twitter Bot...');
 
@@ -99,7 +99,7 @@ cron.schedule('0 1 * * *', async () => {
     Contest.collection.deleteMany({});
 
     const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
-    const query = `retweet to win -filter:retweets -filter:replies filter:safe since:${yesterday}`;
+    const query = `"retweet to win" OR "retweet for a chance to win" OR "retweet to be entered to win" -filter:retweets -filter:replies filter:safe since:${yesterday}`;
 
 
     const searchTweets = async () => {
@@ -157,7 +157,7 @@ cron.schedule('0 1 * * *', async () => {
 
     await searchTweets();
 
-}, { scheduled: true, timezone: "America/Denver" });
+    }, { scheduled: true, timezone: "America/Denver" });
 // })()
 
 
@@ -238,7 +238,7 @@ const hasBannedDescription = (tweet) => {
 }
 
 const isBannedUser = (tweet) => {
-    const bannedUsers = ['HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+    const bannedUsers = ['se0nghwahwa','HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
     return bannedUsers.reduce((val, bannedUser) => {
         if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -259,7 +259,7 @@ const hasBannedContent = (tweet) => {
     }, false)
 }
 
-const has100Followers = (tweet) => tweet.user.followers_count >= 100;
+const has100Followers = tweet => tweet.user.followers_count >= 100;
 
 function decStrNum(n) {
     n = n.toString();
