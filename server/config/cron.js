@@ -99,7 +99,7 @@ cron.schedule('0 1 * * *', async () => {
     Contest.collection.deleteMany({});
 
     const yesterday = moment().tz('America/Denver').subtract(1, "days").format("YYYY-MM-DD")
-    const query = `"retweet to win" OR "retweet for a chance to win" OR "retweet to be entered to win" -filter:retweets -filter:replies filter:safe since:${yesterday}`;
+    const query = `retweet to win -filter:retweets -filter:replies filter:safe since:${yesterday}`;
 
 
     const searchTweets = async () => {
