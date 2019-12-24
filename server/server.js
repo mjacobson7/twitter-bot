@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 
 //DB Connection
-mongoose.connect(secrets.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(secrets.PRODUCTION ? secrets.PRODUCTION_DATABASE : secrets.DEV_DATABASE, { useNewUrlParser: true, useUnifiedTopology: true });
 
 //Cron Job
 require('./config/cron')
