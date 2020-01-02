@@ -42,25 +42,36 @@ const setDaysRemaining = async () => {
 }
 
 const unfollowOldContests = async () => {
-    const following = await Following.find({}).sort({ created_at: -1 }).limit(100);
+    const following = await Following.find({}).sort({ created_at: -1 }).limit(300);
     const users = await User.find({});
 
     await Promise.all(users.map(async user => {
+
         const T = new Twitter({
             consumer_key: secrets.CONSUMER_KEY,
             consumer_secret: secrets.CONSUMER_SECRET,
             access_token_key: user.token,
             access_token_secret: user.tokenSecret,
         });
-        await Promise.all(following.map(async val => {
-            try {
-                await timeout(250);
-                await T.post('friendships/destroy', { id: val.userId });
-            } catch (err) {
-                let error = new Error({ message: err[0].message, username: user.username, tweetId: null, userId: user._id })
-                await error.save();
+
+        try {
+            const friendsList = await T.get('friends/ids', {});
+
+            if (friendsList.ids.length > 3000) {
+
+                await Promise.all(following.map(async val => {
+                    try {
+                        await timeout(250);
+                        await T.post('friendships/destroy', { id: val.userId });
+                    } catch (err) {
+                        let error = new Error({ message: err[0].message, username: user.username, tweetId: null, userId: user._id })
+                        await error.save();
+                    }
+                }))
             }
-        }))
+        } catch (err) {
+            console.log(err)
+        }
     }))
 }
 
