@@ -1,40 +1,45 @@
+const Error = require('../models/Error');
+
 module.exports = {
     timeout: async ms => await new Promise(resolve => setTimeout(resolve, ms)),
-    like: async (T, tweet) => {
-        if (!tweet.favorited) {
+    like: async (T, tweet, user) => {
+       if (!tweet.favorited) {
             try {
                 await T.post('favorites/create', { id: tweet.id_str })
                 return true;
             }
             catch (err) {
-                console.log(err);
+                const error = new Error({ userId: user._id, username: user.username, tweetId: tweet.id_str, message: err[0].message})
+                await error.save();
                 return false;
             }
         }
         return false;
     },
-    follow: async (T, tweet) => {
+    follow: async (T, tweet, user) => {
         if (!tweet.user.following) {
             try {
-                await T.post('friendships/create', { screen_name: tweet.user.screen_name });
+                await T.post('friendships/create', { screen_name: tweet.user.username });
                 return true;
             }
             catch (err) {
-                console.log(err);
-                return Error(err);
+                const error = new Error({ userId: user._id, username: user.username, tweetId: tweet.id_str, message: err[0].message})
+                await error.save();
+                return false;
             }
         } else {
             return false;
         }
     },
-    retweet: async (T, tweet) => {
+    retweet: async (T, tweet, user) => {
         if (!tweet.retweeted) {
             try {
                 await T.post('statuses/retweet/' + tweet.id_str, {});
                 return true;
             }
             catch (err) {
-                console.log(err);
+                const error = new Error({userId: user._id, username: user.username, tweetId: tweet.id_str, message: err[0].message})
+                await error.save();
                 return false;
             }
         } else {
@@ -51,7 +56,7 @@ module.exports = {
         }, false)
     },
     hasBannedDescription: tweet => {
-        const keywords = ['uk', 'corruption', 'taylor swift', 'nsfw', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
+        const keywords = ['uk', 'corruption', 'taylor swift', 'nsfw', 'club', 'xxx', 'sugarbaby', 'sugardaddy', '18+', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
 
         return keywords.reduce((val, keyword) => {
             if (tweet.user.description.toLowerCase().includes(keyword)) {
@@ -61,7 +66,7 @@ module.exports = {
         }, false)
     },
     isBannedUser: tweet => {
-        const bannedUsers = ['zachh_attack', 'soulone69', 'KillySmithh', 'moneypuguk', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+        const bannedUsers = ['zachh_attack', 'soulone69', 'KillySmithh', 'moneypuguk', '_KendelB', 'PLAYINATL', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
         return bannedUsers.reduce((val, bannedUser) => {
             if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -71,7 +76,7 @@ module.exports = {
         }, false)
     },
     hasBannedContent: tweet => {
-        const bannedContent = ['cash', 'bet', 'pinned', 'nsfw', 'trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
+        const bannedContent = ['cash', 'bet', 'pinned', 'nsfw', 'onlyfans', '18+', 'trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote', 'flashy'];
 
         return bannedContent.reduce((val, content) => {
             if (tweet.text.toLowerCase().includes(content)) {
