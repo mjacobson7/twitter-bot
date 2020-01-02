@@ -189,9 +189,8 @@ const getTweets = async () => {
 
                 if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
                     following = new Following({ userId: tweet.user.id_str });
-                    following.save().then(() => {
-                        arr.push(tweet);
-                    })
+                    following.save()                        
+                    arr.push(tweet);
                 }
                 return arr;
             }, [])
@@ -208,5 +207,5 @@ const getTweets = async () => {
     await searchTweets();
 }
 
-// getTweets()
-// enterContests();
+//getTweets()
+//enterContests();
