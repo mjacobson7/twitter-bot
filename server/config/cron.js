@@ -1,6 +1,8 @@
 const cron = require('node-cron');
 const User = require('../models/User');
 const Contest = require('../models/Contest');
+const Following = require('../models/Following');
+const Error = require('../models/Error');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
@@ -12,6 +14,8 @@ if (secrets.PRODUCTION) {
     // Runs at midnight every day
     cron.schedule('0 0 * * *', async () => {
         await setDaysRemaining();
+        await unfollowOldContests();
+        await Error.collection.deleteMany({});
     }, { scheduled: true, timezone: "America/Denver" });
 
 
@@ -28,7 +32,6 @@ if (secrets.PRODUCTION) {
     }, { scheduled: true, timezone: "America/Denver" });
 }
 
-
 const setDaysRemaining = async () => {
     const users = await User.find({ daysRemaining: { $gte: 0 } })
     await Promise.all(users.map(async user => {
@@ -38,7 +41,28 @@ const setDaysRemaining = async () => {
     }))
 }
 
+const unfollowOldContests = async () => {
+    const following = await Following.find({}).sort({ created_at: -1 }).limit(100);
+    const users = await User.find({});
 
+    await Promise.all(users.map(async user => {
+        const T = new Twitter({
+            consumer_key: secrets.CONSUMER_KEY,
+            consumer_secret: secrets.CONSUMER_SECRET,
+            access_token_key: user.token,
+            access_token_secret: user.tokenSecret,
+        });
+        await Promise.all(following.map(async val => {
+            try {
+                await timeout(250);
+                await T.post('friendships/destroy', { id: val.userId });
+            } catch (err) {
+                let error = new Error({ message: err[0].message, username: user.username, tweetId: null, userId: user._id })
+                await error.save();
+            }
+        }))
+    }))
+}
 
 const enterContests = async () => {
     console.log('Starting Twitter Bot...');
@@ -66,19 +90,19 @@ const enterContests = async () => {
             const likeFollowRetweet = async () => {
                 try {
                     await timeout(1000);
-                    await like(T, tweets[i]);
+                    await like(T, tweets[i], user);
 
                     if (!followLimit) {
                         await timeout(1000);
-                        var followRes = await follow(T, tweets[i]);
+                        var followed = await follow(T, tweets[i], user);
                     }
 
-                    if (followRes instanceof Error) {
+                    if (!followed) {
                         followLimit = true;
                     }
 
                     await timeout(1000);
-                    let retweeted = await retweet(T, tweets[i]);
+                    let retweeted = await retweet(T, tweets[i], user);
 
                     if (retweeted) {
                         user.contestsEntered++;
@@ -153,7 +177,10 @@ const getTweets = async () => {
                 let followerThreshold = has100Followers(tweet);
 
                 if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
-                    arr.push(tweet);
+                    following = new Following({ userId: tweet.user.id_str });
+                    following.save().then(() => {
+                        arr.push(tweet);
+                    })
                 }
                 return arr;
             }, [])
