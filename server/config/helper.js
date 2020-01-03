@@ -56,7 +56,7 @@ module.exports = {
         }, false)
     },
     hasBannedDescription: tweet => {
-        const keywords = ['uk', 'corruption', 'taylor swift', 'nsfw', 'club', 'xxx', 'sugarbaby', 'sugardaddy', '18+', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
+        const keywords = ['uk', 'corruption', 'Asim', 'taylor swift', 'nsfw', 'club', 'xxx', 'sugarbaby', 'sugardaddy', '18+', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
 
         return keywords.reduce((val, keyword) => {
             if (tweet.user.description.toLowerCase().includes(keyword)) {
@@ -76,7 +76,7 @@ module.exports = {
         }, false)
     },
     hasBannedContent: tweet => {
-        const bannedContent = ['cash', 'bet', 'pinned', 'nsfw', 'onlyfans', '18+', 'trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote', 'flashy'];
+        const bannedContent = ['cash', 'bet', 'pinned', 'Asim', 'nsfw', 'onlyfans', '18+', 'trump', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote', 'flashy'];
 
         return bannedContent.reduce((val, content) => {
             if (tweet.text.toLowerCase().includes(content)) {
