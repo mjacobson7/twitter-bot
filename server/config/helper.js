@@ -51,7 +51,7 @@ module.exports = {
         }, false)
     },
     hasBannedDescription: tweet => {
-        const keywords = ['uk', 'corruption', 'taylor swift', 'nsfw', 'club', 'xxx', '18+', 'onlyfans', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
+        const keywords = ['uk', 'corruption', 'asim', 'skins', 'CSGO', 'CS:GO', 'taylor swift', 'nsfw', 'club', 'xxx', '18+', 'onlyfans', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
 
         return keywords.reduce((val, keyword) => {
             if (tweet.user.description.toLowerCase().includes(keyword)) {
@@ -71,7 +71,7 @@ module.exports = {
         }, false)
     },
     hasBannedContent: tweet => {
-        const bannedContent = ['cash', 'bet', 'pinned', 'nsfw', 'trump', 'onlyfans', '18+', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
+        const bannedContent = ['cash', 'bet', 'skins', 'asim', 'CSGO', 'CS:GO', 'pinned', 'nsfw', 'trump', 'onlyfans', '18+', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
 
         return bannedContent.reduce((val, content) => {
             if (tweet.text.toLowerCase().includes(content)) {
