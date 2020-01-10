@@ -51,7 +51,7 @@ module.exports = {
         }, false)
     },
     hasBannedDescription: tweet => {
-        const keywords = ['uk', 'corruption', 'asim', 'skins', 'CSGO', 'CS:GO', 'taylor swift', 'nsfw', 'club', 'xxx', '18+', 'onlyfans', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
+        const keywords = ['uk', 'corruption', 'asim', 'bar', 'AK-47', 'fortnite', 'justin', 'skins', 'fan', 'oneus', 'CSGO', 'CS:GO', 'loot', 'taylor swift', 'nsfw', 'club', 'xxx', '18+', 'onlyfans', 'sugarbaby', 'sugardaddy', 'sugar baby', 'sugar daddy', 'onlyfans', 'ariana', 'iphone', 'whatsapp'];
 
         return keywords.reduce((val, keyword) => {
             if (tweet.user.description.toLowerCase().includes(keyword)) {
@@ -61,7 +61,7 @@ module.exports = {
         }, false)
     },
     isBannedUser: tweet => {
-        const bannedUsers = ['zachh_attack', 'soulone69', 'KillySmithh', 'moneypuguk', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+        const bannedUsers = ['zachh_attack', 'jbvotingupdate', 'milesl0renz0', 'soulone69', 'emilia0s', 'itsasiag', 'KillySmithh', 'moneypuguk', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
         return bannedUsers.reduce((val, bannedUser) => {
             if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -71,7 +71,7 @@ module.exports = {
         }, false)
     },
     hasBannedContent: tweet => {
-        const bannedContent = ['cash', 'bet', 'skins', 'asim', 'CSGO', 'CS:GO', 'pinned', 'nsfw', 'trump', 'onlyfans', '18+', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
+        const bannedContent = ['cash', 'bet', 'ariana', 'skins', 'asim', 'AK-47', 'fortnite', 'justin', 'oneus', 'fan', 'babe', 'election', 'loot', 'bar', 'club', 'CSGO', 'CS:GO', 'pinned', 'nsfw', 'trump', 'onlyfans', '18+', 'proof', 'taylor swift', 'iphone', 'paypal', 'bot', '$', 'whatsapp', 'voting', 'vote'];
 
         return bannedContent.reduce((val, content) => {
             if (tweet.text.toLowerCase().includes(content)) {
