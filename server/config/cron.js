@@ -4,7 +4,7 @@ const Contest = require('../models/Contest');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
-const { timeout, like, follow, retweet, isBotAccount, hasBannedDescription, isBannedUser, hasBannedContent, has100Followers, decStrNum } = require('./helper');
+const { timeout, like, follow, retweet, isBotAccount, hasBannedDescription, isBannedUser, hasBannedContent, has100Followers, isQuoteStatus, setDaysRemaining, decStrNum } = require('./helper');
 
 
 if (secrets.PRODUCTION) {
@@ -22,23 +22,11 @@ if (secrets.PRODUCTION) {
     }, { scheduled: true, timezone: "America/Denver" });
 
     // Likes, Follows, and Retweets
-    // Runs every two hours (daily) starting at 2AM until 8PM 
+    // Runs every hour (daily) starting at 2AM until 9PM 
     cron.schedule('0 2-20/2 * * *', async () => {
         await enterContests();
     }, { scheduled: true, timezone: "America/Denver" });
 }
-
-
-const setDaysRemaining = async () => {
-    const users = await User.find({ daysRemaining: { $gte: 0 } })
-    await Promise.all(users.map(async user => {
-        user.daysRemaining -= 1;
-        user.contestsEntered = 0;
-        await user.save();
-    }))
-}
-
-
 
 const enterContests = async () => {
     console.log('Starting Twitter Bot...');
@@ -60,7 +48,6 @@ const enterContests = async () => {
                 access_token_secret: user.tokenSecret,
             });
 
-            let followLimit = false;
             let i = 0;
 
             const likeFollowRetweet = async () => {
@@ -68,14 +55,8 @@ const enterContests = async () => {
                     await timeout(1000);
                     await like(T, tweets[i]);
 
-                    if (!followLimit) {
-                        await timeout(1000);
-                        var followRes = await follow(T, tweets[i]);
-                    }
-
-                    if (followRes instanceof Error) {
-                        followLimit = true;
-                    }
+                    await timeout(1000);
+                    await follow(T, tweets[i]);
 
                     await timeout(1000);
                     let retweeted = await retweet(T, tweets[i]);
@@ -119,28 +100,29 @@ const getTweets = async () => {
 
 
     const searchTweets = async () => {
-        if (i >= 10) return;
+        if (i >= 20) return;
         let results;
-
-        if (i == 0) {
-            try {
-                results = await T.get('search/tweets', { q: query, count: 100 });
-            } catch (err) {
-                console.log(err)
-            }
-
-        } else {
+        let maxId = null;
+        if (i !== 0) {
             let contests = await Contest.find().select("tweets.id_str");
             let contestTweets = contests.map(item => item.tweets)
             let flattened = contestTweets.reduce((a, b) => a.concat(b));
 
-            let maxId = await Math.min.apply(Math, flattened.map(tweet => { return tweet.id_str; }))
-            let maxIdMinusOne = decStrNum(maxId)
-            try {
-                results = await T.get('search/tweets', { q: query, count: 100, max_id: maxIdMinusOne });
-            } catch (err) {
-                console.log(err)
-            }
+            // Get the smallest id_str of stored contest and get the smallest one so future queries 
+            //don't get tweets with ID's greater than this one. This is to prevent duplicate tweets from being stored.
+            maxId = flattened.sort((a, b) => {
+                if (a.id_str === b.id_str) return 0;
+                if (a.id_str.length != b.id_str.length) return a.id_str.length - b.id_str.length;
+                return a.id_str > b.id_str ? 1 : -1;
+            })[0].id_str;
+        }
+
+        let maxIdMinusOne = decStrNum(maxId)
+
+        try {
+            results = await T.get('search/tweets', { q: query, count: 50, max_id: maxIdMinusOne, tweet_mode: 'extended' });
+        } catch (err) {
+            console.log(err)
         }
 
         if (results && results.statuses.length > 0 && !results.statuses.retweeted_status) {
@@ -151,8 +133,9 @@ const getTweets = async () => {
                 let bannedUser = isBannedUser(tweet);
                 let bannedContent = hasBannedContent(tweet);
                 let followerThreshold = has100Followers(tweet);
-
-                if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold) {
+                // let quoteStatus = isQuoteStatus(tweet);
+                let quoteStatus = false;
+                if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold && !quoteStatus) {
                     arr.push(tweet);
                 }
                 return arr;
@@ -170,5 +153,5 @@ const getTweets = async () => {
     await searchTweets();
 }
 
-// getTweets()
+//getTweets()
 // enterContests();
