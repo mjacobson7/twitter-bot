@@ -63,7 +63,7 @@ module.exports = {
         }, false)
     },
     isBannedUser: tweet => {
-        const bannedUsers = ['zachh_attack', 'jbvotingupdate', 'giniqgin', 'batfloke', 'pettergiveaway', 'h0neytheunicorn', 'milesl0renz0', 'soulone69', 'emilia0s', 'itsasiag', 'KillySmithh', 'moneypuguk', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
+        const bannedUsers = ['zachh_attack', 'jbvotingupdate', 'giniqgin', 'CarI_theCutie', 'TheKPVotes', 'batfloke', 'pettergiveaway', 'h0neytheunicorn', 'milesl0renz0', 'soulone69', 'emilia0s', 'itsasiag', 'KillySmithh', 'moneypuguk', 'ggvertigo', 'HypeMikeYT', 'BxArmyph', 'LionRewards', 'WeCryptoGamers', 'TheBuffsheep', 'mercurylarents', 'Bet9jaWinnigs', 'doggishcat', 'se0nghwahwa', 'HealthLottery', 'lateriser12', 'JenPughPsychic', 'SallyZari', 'magic2192', 'mynameispaul', 'amariaajin', 'luisgp51', 'bloggeryanke', 'ukgovcoverup', 'QThePink', 'lion_of_judah2k', 'lkuya5ama', 'bettingvillage', 'flashyflashycom', 'clappedout24v', 'jiminoosaurus', 'bbc_thismorning', 'GIVEAWAY_2006', 'RelaxedReward', 'timetoaddress', 'FitzwilliamDan', 'Giveawayxxage', 'TashaGiveaway', 'SwiftiesIndia13', 'JsmallSAINTS', 'thetaylight', 'bbc_thismorning', 'lion_of_judah2k', 'realnews1234', 'timetoaddress', 'ilove70315673', 'followandrt2win', 'walkermarkk11', 'MuckZuckerburg', 'Michael32558988', 'TerryMasonjr', 'mnsteph', 'BotSp0tterBot', 'bottybotbotl', 'RealB0tSpotter', 'jflessauSpam', 'FuckLymax', 'RealBotSp0tter', 'RealBotSpotter', 'B0tSp0tterB0t', 'BotSpotterBot', 'b0ttem', 'RealBotSpotter', 'b0ttt0m', 'retweeejt', 'JC45195042', 'colleensteam', 'XgamerserX']
 
         return bannedUsers.reduce((val, bannedUser) => {
             if (tweet.user.screen_name.toLowerCase().includes(bannedUser.toLowerCase())) {
@@ -81,6 +81,16 @@ module.exports = {
             }
             return val;
         }, false)
+    },
+    hasValidKeywords: tweet => {
+        // const validKeywords = ['rt to', 'rt and win', 'retweet and win', 'rt for', 'rt 4', 'retweet to']
+        const validKeywords = ['competition time', 'chance to win', 'chance to #win', 'enter to win', 'enter to #win', 'To enter:', 'giveaway time', 'retweet and win',];
+        return validKeywords.reduce((val, keyword) => {
+            if(tweet.full_text.toLowerCase().includes(keyword)) {
+                val = true;
+            }
+            return val;
+        }, false);
     },
     has100Followers: tweet => tweet.user.followers_count >= 100,
     setDaysRemaining: async () => {

@@ -4,7 +4,7 @@ const Contest = require('../models/Contest');
 const secrets = require('./secrets');
 var Twitter = require('twitter');
 const moment = require('moment-timezone');
-const { timeout, like, follow, retweet, isBotAccount, hasBannedDescription, isBannedUser, hasBannedContent, has100Followers, isQuoteStatus, setDaysRemaining, decStrNum } = require('./helper');
+const { timeout, like, follow, retweet, isBotAccount, hasBannedDescription, isBannedUser, hasBannedContent, hasValidKeywords, has100Followers, isQuoteStatus, setDaysRemaining, decStrNum } = require('./helper');
 
 
 if (secrets.PRODUCTION) {
@@ -77,8 +77,8 @@ const enterContests = async () => {
             }
             await likeFollowRetweet();
         }))
-        await Contest.deleteOne({ _id: contests.id });
     }
+    await Contest.deleteOne({ _id: contests.id });
 }
 
 
@@ -120,7 +120,7 @@ const getTweets = async () => {
         let maxIdMinusOne = decStrNum(maxId)
 
         try {
-            results = await T.get('search/tweets', { q: query, count: 50, max_id: maxIdMinusOne, tweet_mode: 'extended' });
+            results = await T.get('search/tweets', { q: query, count: 100, max_id: maxIdMinusOne, tweet_mode: 'extended' });
         } catch (err) {
             console.log(err)
         }
@@ -132,10 +132,11 @@ const getTweets = async () => {
                 let bannedDescription = hasBannedDescription(tweet);
                 let bannedUser = isBannedUser(tweet);
                 let bannedContent = hasBannedContent(tweet);
+                let validKeywords = hasValidKeywords(tweet);
                 let followerThreshold = has100Followers(tweet);
                 // let quoteStatus = isQuoteStatus(tweet);
                 let quoteStatus = false;
-                if (!isBot && !bannedDescription && !bannedUser && !bannedContent && followerThreshold && !quoteStatus) {
+                if (!isBot && !bannedDescription && !bannedUser && !bannedContent && validKeywords && followerThreshold && !quoteStatus) {
                     arr.push(tweet);
                 }
                 return arr;
@@ -154,4 +155,4 @@ const getTweets = async () => {
 }
 
 //getTweets()
-// enterContests();
+//enterContests();
