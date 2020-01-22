@@ -132,7 +132,8 @@ const getTweets = async () => {
                 let bannedDescription = hasBannedDescription(tweet);
                 let bannedUser = isBannedUser(tweet);
                 let bannedContent = hasBannedContent(tweet);
-                let validKeywords = hasValidKeywords(tweet);
+                // let validKeywords = hasValidKeywords(tweet);
+                let validKeywords = true;
                 let followerThreshold = has100Followers(tweet);
                 // let quoteStatus = isQuoteStatus(tweet);
                 let quoteStatus = false;
