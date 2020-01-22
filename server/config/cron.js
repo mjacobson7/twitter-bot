@@ -23,7 +23,7 @@ if (secrets.PRODUCTION) {
 
     // Likes, Follows, and Retweets
     // Runs every hour (daily) starting at 2AM until 9PM 
-    cron.schedule('0 2-20/2 * * *', async () => {
+    cron.schedule('0 2-20/1 * * *', async () => {
         await enterContests();
     }, { scheduled: true, timezone: "America/Denver" });
 }
