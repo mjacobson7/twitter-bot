@@ -143,10 +143,12 @@ const getTweets = async () => {
                 return arr;
             }, [])
 
-            let contest = new Contest();
-            contest.tweets = tweetArr;
+            if (tweetArr.length > 0) {
+                let contest = new Contest();
+                contest.tweets = tweetArr;
+                await contest.save();
+            }
             i++;
-            await contest.save();
             await timeout(1000)
             await searchTweets();
             return;
