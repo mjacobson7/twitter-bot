@@ -3,7 +3,7 @@ const User = require('../models/User');
 module.exports = {
     timeout: async ms => await new Promise(resolve => setTimeout(resolve, ms)),
     like: async (T, tweet) => {
-        if ((tweet.full_text.includes('fav') || tweet.full_text.includes('Fav') || tweet.full_text.includes('FAV')) && !tweet.favorited) {
+        if ((tweet.full_text.includes('fav') || tweet.full_text.includes('Fav') || tweet.full_text.includes('FAV') || tweet.full_text.includes('LIKE') || tweet.full_text.includes('Like')) && !tweet.favorited) {
             try {
                 await T.post('favorites/create', { id: tweet.id_str })
                 return true;
