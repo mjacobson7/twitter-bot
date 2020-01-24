@@ -381,9 +381,8 @@ export default {
       } else {
         alert("You must agree to the terms and conditions");
       }
-    }
-  },
-  mounted() {
+    },
+    getUser() {
     this.$http.get("/getAuthenticatedUser").then(data => {
       if (data.body) {
         this.loading = false;
@@ -392,6 +391,16 @@ export default {
         this.logout();
       }
     });
+    },
+    getBannedList() {
+      this.$http.get('/bannedUsers').then(data => {
+        console.log(data)
+      })
+    }
+  },
+  mounted() {
+    this.getUser();
+    this.getBannedList();
   },
   computed: {
     preventClose() {
