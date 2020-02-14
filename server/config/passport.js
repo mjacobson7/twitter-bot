@@ -21,7 +21,7 @@ module.exports = passport => {
     passport.use(new TwitterStrategy({
         consumerKey: secrets.CONSUMER_KEY,
         consumerSecret: secrets.CONSUMER_SECRET,
-        callbackURL: secrets.CALLBACK_URL,
+        callbackURL: secrets.production ? secrets.CALLBACK_URL : secrets.DEV_CALLBACK_URL,
         passReqToCallback: true,
         userAuthorizationURL: 'https://api.twitter.com/oauth/authenticate'
     },
