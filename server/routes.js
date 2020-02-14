@@ -1,8 +1,16 @@
 const secrets = require('./config/secrets');
 const User = require('./models/User');
+const BannedUser = require('./models/BannedUser');
 
 
 module.exports = (app, passport) => {
+
+    const isAuthenticated = (req, res, next) => {
+        if(req.isAuthenticated()) {
+            return next();
+        }
+        res.redirect('/')
+    };
 
     app.get('/acceptTerms', (req, res) => {
         if(req.user) {
@@ -31,6 +39,16 @@ module.exports = (app, passport) => {
 
     })
 
+    app.get('/bannedUsers', isAuthenticated,  (req, res) => {
+        BannedUser.find({})
+            .then(data => {
+                res.status(200).json(data)
+            })
+            .catch(err => {
+                res.status(500).json(err)
+            })
+    })
+
     app.get('/logout', (req, res) => {
         req.logout();
         res.status(200).send();
@@ -42,6 +60,8 @@ module.exports = (app, passport) => {
         successRedirect: '/#/dashboard',
         failureRedirect: '/'
     }));
+
+
 
 
 }

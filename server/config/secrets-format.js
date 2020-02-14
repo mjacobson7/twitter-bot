@@ -2,6 +2,7 @@ module.exports = {
     CONSUMER_KEY: '',
     CONSUMER_SECRET: '',
     CALLBACK_URL: '',
+    DEV_CALLBACK_URL: '',
     DEV_DATABASE: '',
     PRODUCTION_DATABASE: '',
     SESSION_SECRET: '',

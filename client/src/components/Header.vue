@@ -1,7 +1,6 @@
 <template>
   <div class="topnav">
-    <img class="header-logo-image" src="../assets/myGoodBot-image-white.png" />
-    <img class="header-logo-text" src="../assets/myGoodBot-text-white.png" />
+    <img class="header-logo" src="../assets/logo.png" />
     <span v-if="user" @click="logout" class="logout">Logout</span>
   </div>
 </template>
@@ -27,24 +26,16 @@ export default {
   margin-bottom: 20px;
 }
 
-.header-logo-image {
+.header-logo {
   height: 50px;
   margin-left: 20px;
-  vertical-align: middle;
-}
-
-.header-logo-text {
-  height: 35px;
+  margin-bottom: 5px;
   vertical-align: middle;
 }
 
 @media(max-width: 600px) {
-  .header-logo-image {
+  .header-logo {
     height: 40px;
-  }
-
-  .header-logo-text {
-    height: 25px;
   }
 
   .logout {

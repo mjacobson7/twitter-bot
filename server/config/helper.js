@@ -96,6 +96,7 @@ module.exports = {
     setDaysRemaining: async () => {
         const users = await User.find({ daysRemaining: { $gte: 0 } })
         await Promise.all(users.map(async user => {
+            if(user.daysRemaining == 0) return;
             user.daysRemaining -= 1;
             user.contestsEntered = 0;
             await user.save();
