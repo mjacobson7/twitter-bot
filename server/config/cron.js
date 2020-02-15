@@ -35,7 +35,7 @@ const enterContests = async () => {
     const tweets = contests ? contests.tweets : [];
 
     if (tweets.length > 0) {
-        const users = await User.find({ daysRemaining: { $gte: 0 } })
+        const users = await User.find({ daysRemaining: { $gt: 0 } })
 
         await Promise.all(users.map(async user => {
 

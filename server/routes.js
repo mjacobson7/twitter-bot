@@ -12,16 +12,6 @@ module.exports = (app, passport) => {
         res.redirect('/')
     };
 
-    app.get('/acceptTerms', (req, res) => {
-        if(req.user) {
-            req.user.termsAccepted = true;
-            req.user.termsAcceptedDate = new Date();
-            req.user.save().then(data => {
-                res.status(200).json(data);
-            })
-        }
-    })
-
     app.get('/userAuthenticated', (req, res) => {
         if (req.user) {
             res.status(200).json(true)

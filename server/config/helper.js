@@ -94,7 +94,7 @@ module.exports = {
     },
     has100Followers: tweet => tweet.user.followers_count >= 100,
     setDaysRemaining: async () => {
-        const users = await User.find({ daysRemaining: { $gte: 0 } })
+        const users = await User.find({ daysRemaining: { $gt: 0 } })
         await Promise.all(users.map(async user => {
             if(user.daysRemaining == 0) return;
             user.daysRemaining -= 1;
