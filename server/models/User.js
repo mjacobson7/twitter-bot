@@ -6,9 +6,9 @@ const userSchema = mongoose.Schema({
     tokenSecret: String,
     username: String,
     daysRemaining: Number,
-    contestsEntered: Number,
-    termsAccepted: Boolean,
-    termsAcceptedDate: Date
-});
+    contestsEntered: Number
+}, {
+    timestamps: true
+    });
 
 module.exports = mongoose.model('User', userSchema);
