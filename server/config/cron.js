@@ -63,6 +63,7 @@ const enterContests = async () => {
 
                     if (retweeted) {
                         user.contestsEntered++;
+                        user.totalContestsEntered++;
                         await user.save();
                     }
                     i++;
