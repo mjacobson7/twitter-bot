@@ -6,7 +6,8 @@ const userSchema = mongoose.Schema({
     tokenSecret: String,
     username: String,
     daysRemaining: Number,
-    contestsEntered: Number
+    contestsEntered: Number,
+    totalContestsEntered: Number
 }, {
     timestamps: true
     });

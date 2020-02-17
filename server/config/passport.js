@@ -50,6 +50,7 @@ module.exports = passport => {
                         newUser.username = profile.username;
                         newUser.daysRemaining = 0;
                         newUser.contestsEntered = 0;
+                        newUser.totalContestsEntered = 0;
 
                         // save our user into the database
                         newUser.save(function (err) {

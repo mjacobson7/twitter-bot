@@ -1,5 +1,6 @@
 const secrets = require('./config/secrets');
 const User = require('./models/User');
+const Contest = require('./models/Contest');
 const BannedUser = require('./models/BannedUser');
 
 
@@ -22,7 +23,12 @@ module.exports = (app, passport) => {
 
     app.get('/getAuthenticatedUser', (req, res) => {
         if (req.user) {
-            res.status(200).json(req.user)
+            Contest.find({}).then(data => {
+
+                const contestsRemaining = data.reduce((count, contests) => count += contests.tweets.length, 0)
+                res.status(200).json({ user: req.user, contestsRemaining: contestsRemaining})
+                
+            })
         } else {
             res.status(200).json(null)
         }
