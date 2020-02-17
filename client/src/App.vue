@@ -9,6 +9,8 @@ export default {};
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Nunito&display=swap");
+
 .button {
   background-color: #0c83cc;
   display: inline-block;
@@ -117,7 +119,7 @@ video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font-family: "Lato", sans-serif;
+  font-family: "Nunito", sans-serif;
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
