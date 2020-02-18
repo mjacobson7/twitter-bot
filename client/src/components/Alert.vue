@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from "moment";
 
 export default {
   props: ["alert"],
@@ -51,6 +51,7 @@ export default {
 
 .content-container .message {
   width: 80%;
+  margin-right: 50px;
 }
 
 .content-container .date {
@@ -65,5 +66,25 @@ export default {
 
 .content-container .close:hover {
   color: #0d6ace;
+}
+
+@media screen and (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+  }
+
+  .content-container img {
+    margin-bottom: 10px;
+  }
+
+  .content-container .message {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .content-container .date {
+    margin-left: unset;
+    padding: 10px;
+  }
 }
 </style>
