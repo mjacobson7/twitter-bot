@@ -2,10 +2,13 @@
   <div style="background-color: #F4F6FC;">
     <Header user="user"></Header>
 
+    <Alert v-for="alert in alerts" :key="alert._id" :alert="alert" @dismiss="dismissAlert"></Alert>
+
     <div style class="dashboardData">
       <div>
         <div class="contestData" v-if="user">
           <p>Welcome {{user.username}}!</p>
+          <router-link to="/admin" v-if="user && user.isAdmin">Admin</router-link>
         </div>
         <div v-if="loading">
           <img style="height: 186px;" src="../assets/loading.gif" />
@@ -44,7 +47,7 @@
       <Faq question="How do I fix a locked or limited Twitter account?">
         <p>heyo</p>
       </Faq>
-    </div> -->
+    </div>-->
   </div>
 </template>
 
@@ -52,18 +55,21 @@
 import Header from "./Header";
 import Card from "./Card";
 import Faq from "./Faq";
+import Alert from "./Alert";
 
 export default {
   components: {
     Header,
     Card,
-    Faq
+    Faq,
+    Alert
   },
   data() {
     return {
       user: null,
       contestsRemaining: null,
-      loading: true
+      loading: true,
+      alerts: []
     };
   },
   methods: {
@@ -83,10 +89,21 @@ export default {
           this.logout();
         }
       });
+    },
+    getAlerts() {
+      this.$http.get("/getAlerts").then(res => {
+        this.alerts = res.data;
+      });
+    },
+    dismissAlert(id) {
+      this.$http.post("/dismissAlert", { alertId: id }).then(() => {
+        this.getAlerts();
+      });
     }
   },
   mounted() {
     this.getUser();
+    this.getAlerts();
   }
 };
 </script>

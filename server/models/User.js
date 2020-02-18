@@ -7,7 +7,8 @@ const userSchema = mongoose.Schema({
     username: String,
     daysRemaining: Number,
     contestsEntered: Number,
-    totalContestsEntered: Number
+    totalContestsEntered: Number,
+    isAdmin: Boolean
 }, {
     timestamps: true
     });
