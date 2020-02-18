@@ -16,15 +16,16 @@ if (secrets.PRODUCTION) {
 
 
     // Get tweets for the day
-    // Runs every day at 1 AM
-    cron.schedule('0 1 * * *', async () => {
+    // Runs every day at 12:30 AM
+    cron.schedule('30 0 * * *', async () => {
         await getTweets();
     }, { scheduled: true, timezone: "America/Denver" });
 
     // Likes, Follows, and Retweets
     // Runs every hour (daily) starting at 2AM until 9PM 
     // UPDATE: Now runs every two hours starting at 2AM until 10PM to see if Twitter Limit Issues get resolved
-    cron.schedule('0 2-22/2 * * *', async () => {
+    // NEW UPDATE:  Runs every 3rd hour from 1AM to 10PM which happens 8 times per day
+    cron.schedule('0 1-22/3 * * *', async () => {
         await enterContests();
     }, { scheduled: true, timezone: "America/Denver" });
 }
@@ -32,8 +33,7 @@ if (secrets.PRODUCTION) {
 const enterContests = async () => {
     console.log('Starting Twitter Bot...');
 
-    const contests = await Contest.findOne().sort({ created_at: 1 })
-    const tweets = contests ? contests.tweets : [];
+    const tweets = await Contest.find().sort({ created_at: 1 }).limit(15);
 
     if (tweets.length > 0) {
         const users = await User.find({ daysRemaining: { $gt: 0 } })
@@ -53,13 +53,13 @@ const enterContests = async () => {
 
             const likeFollowRetweet = async () => {
                 try {
-                    await timeout(3000);
+                    await timeout(1000);
                     await like(T, tweets[i]);
 
-                    await timeout(3000);
+                    await timeout(1000);
                     await follow(T, tweets[i]);
 
-                    await timeout(3000);
+                    await timeout(1000);
                     let retweeted = await retweet(T, tweets[i], user._id);
 
                     if (retweeted) {
@@ -67,6 +67,8 @@ const enterContests = async () => {
                         user.totalContestsEntered++;
                         await user.save();
                     }
+                    await Contest.deleteOne({ _id: tweets[i].id });
+
                     i++;
                     if (i < tweets.length) {
                         likeFollowRetweet();
@@ -80,7 +82,6 @@ const enterContests = async () => {
             await likeFollowRetweet();
         }))
     }
-    await Contest.deleteOne({ _id: contests.id });
 }
 
 
@@ -106,17 +107,16 @@ const getTweets = async () => {
         let results;
         let maxId = null;
         if (i !== 0) {
-            let contests = await Contest.find().select("tweets.id_str");
-            let contestTweets = contests.map(item => item.tweets)
-            let flattened = contestTweets.reduce((a, b) => a.concat(b));
+            let contests = await Contest.find().select("id_str");
 
             // Get the smallest id_str of stored contest and get the smallest one so future queries 
-            //don't get tweets with ID's greater than this one. This is to prevent duplicate tweets from being stored.
-            maxId = flattened.sort((a, b) => {
+            // don't get tweets with ID's greater than this one. This is to prevent duplicate tweets from being stored.
+            maxId = contests.sort((a, b) => {
                 if (a.id_str === b.id_str) return 0;
                 if (a.id_str.length != b.id_str.length) return a.id_str.length - b.id_str.length;
                 return a.id_str > b.id_str ? 1 : -1;
             })[0].id_str;
+
         }
 
         let maxIdMinusOne = decStrNum(maxId)
@@ -139,20 +139,36 @@ const getTweets = async () => {
                 let followerThreshold = has100Followers(tweet);
                 // let quoteStatus = isQuoteStatus(tweet);
                 let quoteStatus = false;
+
                 if (!isBot && !bannedDescription && !bannedUser && !bannedContent && validKeywords && followerThreshold && !quoteStatus) {
                     arr.push(tweet);
                 }
                 return arr;
             }, [])
-
+  
             if (tweetArr.length > 0) {
-                let contest = new Contest();
-                contest.tweets = tweetArr;
-                await contest.save();
+                await Promise.all(tweetArr.map(async (tweet) => {
+                    let contest = new Contest();
+                    contest.id_str = tweet.id_str;
+                    contest.full_text = tweet.full_text;
+                    contest.favorited = tweet.favorited;
+                    contest.retweeted = tweet.retweeted;
+                    contest.following = tweet.user.following;
+                    contest.is_quote_status = tweet.is_quote_status;
+                    contest.screen_name = tweet.user.screen_name;
+                    contest.name = tweet.user.name;
+                    contest.description = tweet.user.description;
+                    contest.followers_count = tweet.user.followers_count;
+                    await contest.save();
+                }))
             }
             i++;
             await timeout(1000)
-            await searchTweets();
+            let numContests = await Contest.countDocuments();
+            //This is to allow 20 users to use the bot and enter up to 150 contests per day without going over rate limit
+            if(numContests <= 150) {
+                await searchTweets();
+            }
             return;
         }
     }
