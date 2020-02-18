@@ -2,7 +2,9 @@
   <div style="background-color: #F4F6FC;">
     <Header user="user"></Header>
 
-    <Alert v-for="alert in alerts" :key="alert._id" :alert="alert" @dismiss="dismissAlert"></Alert>
+    <div v-for="alert in alerts" :key="alert._id">
+      <Alert v-if="showAlerts(alert.createdAt)" :alert="alert" @dismiss="dismissAlert"></Alert>
+    </div>
 
     <div style class="dashboardData">
       <div>
@@ -99,6 +101,11 @@ export default {
       this.$http.post("/dismissAlert", { alertId: id }).then(() => {
         this.getAlerts();
       });
+    },
+    showAlerts(alertCreated) {
+      let userCreated = new Date(user.createdAt);
+      let notificationCreated = new Date(alertCreated);
+      return this.user.daysRemaining > 0 && user.createdAt < notificationCreated;
     }
   },
   mounted() {

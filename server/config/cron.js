@@ -23,7 +23,8 @@ if (secrets.PRODUCTION) {
 
     // Likes, Follows, and Retweets
     // Runs every hour (daily) starting at 2AM until 9PM 
-    cron.schedule('0 2-20/1 * * *', async () => {
+    // UPDATE: Now runs every two hours starting at 2AM until 10PM to see if Twitter Limit Issues get resolved
+    cron.schedule('0 2-22/2 * * *', async () => {
         await enterContests();
     }, { scheduled: true, timezone: "America/Denver" });
 }
