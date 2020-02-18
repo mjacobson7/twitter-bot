@@ -103,9 +103,9 @@ export default {
       });
     },
     showAlerts(alertCreated) {
-      let userCreated = new Date(user.createdAt);
+      let userCreated = new Date(this.user.createdAt);
       let notificationCreated = new Date(alertCreated);
-      return this.user.daysRemaining > 0 && user.createdAt < notificationCreated;
+      return this.user.daysRemaining > 0 && userCreated < notificationCreated;
     }
   },
   mounted() {
