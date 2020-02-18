@@ -3,7 +3,7 @@
     <Header user="user"></Header>
 
     <div v-for="alert in alerts" :key="alert._id">
-      <Alert v-if="showAlerts(alert.createdAt)" :alert="alert" @dismiss="dismissAlert"></Alert>
+      <Alert v-if="user && showAlerts(alert.createdAt)" :alert="alert" @dismiss="dismissAlert"></Alert>
     </div>
 
     <div style class="dashboardData">
