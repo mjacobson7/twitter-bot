@@ -29,14 +29,14 @@ module.exports = {
             return false;
         }
     },
-    retweet: async (T, tweet) => {
+    retweet: async (T, tweet, userId) => {
         if (!tweet.retweeted) {
             try {
                 await T.post('statuses/retweet/' + tweet.id_str, {});
                 return true;
             }
             catch (err) {
-                console.log(err);
+                console.log({error: err, userId: userId});
                 return false;
             }
         } else {

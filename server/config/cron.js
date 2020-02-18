@@ -53,14 +53,14 @@ const enterContests = async () => {
 
             const likeFollowRetweet = async () => {
                 try {
-                    await timeout(1000);
+                    await timeout(3000);
                     await like(T, tweets[i]);
 
-                    await timeout(1000);
+                    await timeout(3000);
                     await follow(T, tweets[i]);
 
-                    await timeout(1000);
-                    let retweeted = await retweet(T, tweets[i]);
+                    await timeout(3000);
+                    let retweeted = await retweet(T, tweets[i], user._id);
 
                     if (retweeted) {
                         user.contestsEntered++;
