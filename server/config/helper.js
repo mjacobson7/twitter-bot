@@ -16,9 +16,9 @@ module.exports = {
         return false;
     },
     follow: async (T, tweet) => {
-        if ((tweet.full_text.includes('follow') || tweet.full_text.includes('#follow') || tweet.full_text.includes('#Follow') || tweet.full_text.includes('Follow') || tweet.full_text.includes('FOLLOW') || tweet.full_text.includes('#FOLLOW') || tweet.full_text.includes('following') || tweet.full_text.includes('#following') || tweet.full_text.includes('FOLLOWING') || tweet.full_text.includes('#FOLLOWING') || tweet.full_text.includes('Following') || tweet.full_text.includes('#Following')) && !tweet.user.following) {
+        if ((tweet.full_text.includes('follow') || tweet.full_text.includes('#follow') || tweet.full_text.includes('#Follow') || tweet.full_text.includes('Follow') || tweet.full_text.includes('FOLLOW') || tweet.full_text.includes('#FOLLOW') || tweet.full_text.includes('following') || tweet.full_text.includes('#following') || tweet.full_text.includes('FOLLOWING') || tweet.full_text.includes('#FOLLOWING') || tweet.full_text.includes('Following') || tweet.full_text.includes('#Following')) && !tweet.following) {
             try {
-                await T.post('friendships/create', { screen_name: tweet.user.screen_name });
+                await T.post('friendships/create', { screen_name: tweet.screen_name });
                 return true;
             }
             catch (err) {
