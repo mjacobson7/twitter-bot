@@ -31,11 +31,9 @@ module.exports = (app, passport) => {
 
     app.get('/getAuthenticatedUser', (req, res) => {
         if (req.user) {
-            Contest.find({}).then(data => {
-
-                const contestsRemaining = data.reduce((count, contests) => count += contests.tweets.length, 0)
+            Contest.find({}).then(async (data) => {
+                const contestsRemaining = await Contest.countDocuments();
                 res.status(200).json({ user: req.user, contestsRemaining: contestsRemaining })
-
             })
         } else {
             res.status(200).json(null)
